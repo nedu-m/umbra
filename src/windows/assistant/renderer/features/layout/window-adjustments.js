@@ -1,16 +1,19 @@
 export function createWindowAdjustmentManager({
     windowResizeHandles,
+    moveDragHandle,
     chatContainer,
     minWindowWidth,
     minWindowHeight,
     onViewportResize
 }) {
     let activeWindowResize = null;
+    let activeWindowDrag = null;
     let pendingWindowBounds = null;
     let windowResizeFrame = null;
 
     function setupWindowAdjustments() {
         setupWindowResizeHandles();
+        setupWindowDragHandle();
         enforceChatFillLayout();
         window.addEventListener('resize', () => {
             enforceChatFillLayout();
@@ -35,6 +38,14 @@ export function createWindowAdjustmentManager({
         windowResizeHandles.forEach((handle) => {
             handle.addEventListener('pointerdown', startWindowResize);
         });
+    }
+
+    function setupWindowDragHandle() {
+        if (!window.electronAPI || !moveDragHandle) {
+            return;
+        }
+
+        moveDragHandle.addEventListener('pointerdown', startWindowDrag);
     }
 
     async function startWindowResize(event) {
@@ -77,6 +88,40 @@ export function createWindowAdjustmentManager({
         document.addEventListener('pointercancel', stopWindowResize);
     }
 
+    async function startWindowDrag(event) {
+        if (!window.electronAPI?.getWindowBounds || !window.electronAPI?.setWindowBounds) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        const handleElement = event.currentTarget;
+        const pointerId = event.pointerId;
+        const startScreenX = event.screenX;
+        const startScreenY = event.screenY;
+        const startBounds = await window.electronAPI.getWindowBounds();
+        if (!startBounds || startBounds.error) {
+            console.error('Failed to get initial window bounds for drag:', startBounds?.error);
+            return;
+        }
+
+        activeWindowDrag = {
+            pointerId,
+            startScreenX,
+            startScreenY,
+            startBounds,
+            handleElement
+        };
+
+        document.body.classList.add('window-resizing');
+        handleElement.setPointerCapture?.(pointerId);
+
+        document.addEventListener('pointermove', onWindowDragMove);
+        document.addEventListener('pointerup', stopWindowDrag);
+        document.addEventListener('pointercancel', stopWindowDrag);
+    }
+
     function onWindowResizeMove(event) {
         if (!activeWindowResize || event.pointerId !== activeWindowResize.pointerId) {
             return;
@@ -94,6 +139,24 @@ export function createWindowAdjustmentManager({
         );
 
         scheduleWindowResize(nextBounds);
+    }
+
+    function onWindowDragMove(event) {
+        if (!activeWindowDrag || event.pointerId !== activeWindowDrag.pointerId) {
+            return;
+        }
+
+        event.preventDefault();
+
+        const deltaX = event.screenX - activeWindowDrag.startScreenX;
+        const deltaY = event.screenY - activeWindowDrag.startScreenY;
+
+        scheduleWindowResize({
+            x: Math.round(activeWindowDrag.startBounds.x + deltaX),
+            y: Math.round(activeWindowDrag.startBounds.y + deltaY),
+            width: activeWindowDrag.startBounds.width,
+            height: activeWindowDrag.startBounds.height
+        });
     }
 
     function calculateWindowResizeBounds(startBounds, direction, deltaX, deltaY) {
@@ -171,6 +234,30 @@ export function createWindowAdjustmentManager({
         document.removeEventListener('pointermove', onWindowResizeMove);
         document.removeEventListener('pointerup', stopWindowResize);
         document.removeEventListener('pointercancel', stopWindowResize);
+    }
+
+    function stopWindowDrag(event) {
+        if (!activeWindowDrag) {
+            return;
+        }
+
+        if (event.pointerId && event.pointerId !== activeWindowDrag.pointerId) {
+            return;
+        }
+
+        activeWindowDrag.handleElement?.releasePointerCapture?.(activeWindowDrag.pointerId);
+        activeWindowDrag = null;
+        pendingWindowBounds = null;
+
+        if (windowResizeFrame) {
+            window.cancelAnimationFrame(windowResizeFrame);
+            windowResizeFrame = null;
+        }
+
+        document.body.classList.remove('window-resizing');
+        document.removeEventListener('pointermove', onWindowDragMove);
+        document.removeEventListener('pointerup', stopWindowDrag);
+        document.removeEventListener('pointercancel', stopWindowDrag);
     }
 
     return {

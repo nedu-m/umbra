@@ -16,121 +16,108 @@
     <div class="window-resize-handle resize-handle-se" data-resize-handle="se" aria-hidden="true"></div>
     <div class="window-resize-handle resize-handle-sw" data-resize-handle="sw" aria-hidden="true"></div>
     <div class="window-resize-handle resize-handle-nw" data-resize-handle="nw" aria-hidden="true"></div>
-    <!-- Draggable Header with Close Button -->
-    <div class="drag-handle">
-      <button id="close-app-btn" class="close-app-btn">&times;</button>
-    </div>
-    <!-- Compact Interface - Horizontal Layout like Cluely -->
-    <div class="main-interface">
-      <!-- Status Section with Timer and Count -->
-      <div class="status-section">
-        <div class="status-dot"></div>
-        <span class="timer">00:00</span>
-        <div class="screenshot-count" id="screenshot-count">0</div>
-      </div>
-      
-      <!-- Action Buttons - Compact -->
-      <div class="content-section">
-        <div class="action-buttons">
-          <div id="transcription-control" class="transcription-control">
-            <button id="transcription-toggle" class="action-btn transcription-btn" type="button" aria-label="Toggle transcription">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 10v4" />
-                <path d="M7 7v10" />
-                <path d="M11 4v16" />
-                <path d="M15 7v10" />
-                <path d="M19 10v4" />
-              </svg>
-            </button>
-            <div id="transcription-sources" class="transcription-sources" role="group" aria-label="Transcription sources">
-              <button id="source-system-toggle" class="source-toggle source-system selected" type="button">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                </svg>
-              </button>
-              <button id="source-mic-toggle" class="source-toggle source-mic" type="button">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <path d="M12 19v4"/>
-                  <path d="M8 23h8"/>
-                </svg>
-              </button>
-            </div>
-          </div>
 
-          <button id="screenshot-btn" class="action-btn screenshot-btn">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+    <!-- Single slim toolbar — ParakeetAI style -->
+    <div class="toolbar drag-handle">
+      <!-- Left: action icon buttons -->
+      <div class="toolbar-left">
+        <div id="transcription-control" class="transcription-control">
+          <button id="transcription-toggle" class="toolbar-btn transcription-btn" type="button" aria-label="Start or stop live transcription" title="Transcribe">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 10v4" /><path d="M7 7v10" /><path d="M11 4v16" /><path d="M15 7v10" /><path d="M19 10v4" />
             </svg>
           </button>
-
-          <button id="analyze-btn" class="action-btn analyze-btn">
-            Ask AI
-          </button>
-
-          <button id="screen-ai-btn" class="action-btn screen-ai-btn">
-            Screen AI
-          </button>
-
-          <button id="suggest-btn" class="action-btn suggest-btn" type="button" aria-label="Generate suggestions">
-            Suggest
-          </button>
-
-          <button id="notes-btn" class="action-btn notes-btn" type="button" aria-label="Generate meeting notes">
-            Notes
-          </button>
-
-          <button id="insights-btn" class="action-btn insights-btn" type="button" aria-label="Generate conversation insights">
-            Insights
-          </button>
-
-          <button id="clear-btn" class="action-btn clear-btn">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-            </svg>
-          </button>
-
-          <div class="utility-buttons">
-            <button
-              id="theme-toggle-btn"
-              class="action-btn theme-toggle-btn"
-              type="button"
-              aria-label="Switch to dark mode"
-              aria-pressed="false"
-            >
-              <svg class="theme-toggle-icon theme-toggle-icon-moon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M12.25 2.1a1 1 0 0 0-.92 1.34 8.5 8.5 0 0 1-9.88 11.22 1 1 0 0 0-1.08 1.52A11 11 0 1 0 12.25 2.1z" />
-              </svg>
-              <svg class="theme-toggle-icon theme-toggle-icon-sun" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2" />
-                <path d="M12 20v2" />
-                <path d="m4.93 4.93 1.41 1.41" />
-                <path d="m17.66 17.66 1.41 1.41" />
-                <path d="M2 12h2" />
-                <path d="M20 12h2" />
-                <path d="m6.34 17.66-1.41 1.41" />
-                <path d="m19.07 4.93-1.41 1.41" />
+          <div id="transcription-sources" class="transcription-sources" role="group" aria-label="Transcription sources">
+            <button id="source-system-toggle" class="source-toggle source-system selected" type="button" title="Meeting audio">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
               </svg>
             </button>
-
-            <button id="settings-btn" class="action-btn settings-btn">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/>
-              </svg>
-            </button>
-
-            <button id="hide-btn" class="action-btn hide-btn">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7a1 1 0 1 0-1.42 1.42L10.59 12l-4.9 4.89a1 1 0 0 0 1.42 1.42L12 13.41l4.89 4.9a1 1 0 0 0 1.42-1.42L13.41 12l4.9-4.89a1 1 0 0 0 0-1.4Z"/>
+            <button id="source-mic-toggle" class="source-toggle source-mic" type="button" title="Your microphone">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v4"/><path d="M8 23h8"/>
               </svg>
             </button>
           </div>
         </div>
+        <button id="screenshot-btn" class="toolbar-btn screenshot-btn" type="button" title="Snap Screen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Center: tab-style action buttons -->
+      <div class="toolbar-center">
+        <button id="analyze-btn" class="toolbar-tab active-tab" type="button">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 4l7.53 13H4.47L12 6z"/></svg>
+          AI Answer
+        </button>
+        <button id="screen-ai-btn" class="toolbar-tab" type="button">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
+          Analyze Screen
+        </button>
+        <button id="chat-tab-btn" class="toolbar-tab" type="button">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
+          Chat
+        </button>
+      </div>
+
+      <!-- Right: timer, menu, utilities -->
+      <div class="toolbar-right">
+        <div class="toolbar-timer">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
+          <span class="timer">00:00</span>
+          <span class="screenshot-count" id="screenshot-count">0</span>
+        </div>
+        <!-- Three-dot menu -->
+        <div class="toolbar-menu-wrap">
+          <button id="toolbar-menu-btn" class="toolbar-btn" type="button" title="More options" aria-label="More options">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+          </button>
+          <div id="toolbar-menu" class="toolbar-menu hidden">
+            <button id="auto-answer-btn" class="menu-item" type="button">
+              <span class="menu-item-label">Auto Answer</span>
+              <span class="menu-item-value">Off</span>
+            </button>
+            <div class="menu-divider"></div>
+            <button id="suggest-btn" class="menu-item" type="button">Suggest</button>
+            <button id="notes-btn" class="menu-item" type="button">Notes</button>
+            <button id="insights-btn" class="menu-item" type="button">Insights</button>
+            <div class="menu-divider"></div>
+            <button id="clear-btn" class="menu-item" type="button">Clear Context</button>
+            <button id="theme-toggle-btn" class="menu-item" type="button" aria-pressed="false">
+              <span class="menu-item-label">Dark Mode</span>
+              <span class="menu-toggle-indicator"></span>
+            </button>
+            <div class="menu-divider"></div>
+            <button id="settings-btn" class="menu-item" type="button">Settings</button>
+            <button id="hide-btn" class="menu-item menu-item-danger" type="button">
+              <span class="menu-item-label">Hide</span>
+              <kbd>Alt+Shift+H</kbd>
+            </button>
+          </div>
+        </div>
+        <button id="move-app-btn" class="toolbar-btn utility-btn" type="button" title="Move window" aria-label="Move window">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20"/><path d="M2 12h20"/>
+            <path d="m8 6 4-4 4 4"/><path d="m8 18 4 4 4-4"/>
+            <path d="m6 8-4 4 4 4"/><path d="m18 8 4 4-4 4"/>
+          </svg>
+        </button>
+        <button id="hide-app-btn" class="toolbar-btn utility-btn" type="button" title="Hide" aria-label="Hide window">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m6 14 6-6 6 6"/>
+          </svg>
+        </button>
+        <button id="close-app-btn" class="toolbar-btn utility-btn close-app-btn" type="button" title="Close" aria-label="Close app">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+        </button>
       </div>
     </div>
-    
+
+    <!-- Transcription monitor (compact) -->
     <div id="transcription-monitor" class="transcription-monitor">
       <div class="monitor-header">
         <span class="monitor-title">Transcription Monitor</span>
@@ -138,12 +125,12 @@
       </div>
       <div class="monitor-source-grid">
         <div class="monitor-source-row">
-          <span class="monitor-source-label">Host</span>
+          <span class="monitor-source-label">Meeting</span>
           <span id="monitor-status-system" class="monitor-status-badge off">Off</span>
           <span id="monitor-live-system" class="monitor-live-text">No transcript yet</span>
         </div>
         <div class="monitor-source-row">
-          <span class="monitor-source-label">Mic</span>
+          <span class="monitor-source-label">You</span>
           <span id="monitor-status-mic" class="monitor-status-badge off">Off</span>
           <span id="monitor-live-mic" class="monitor-live-text">No transcript yet</span>
         </div>
@@ -154,28 +141,25 @@
     <!-- Chat Interface -->
     <div id="chat-container" class="chat-container">
       <div class="chat-header">
-        <span class="chat-title">&#x1F916; AI Assistant</span>
+        <span class="chat-title">AI Assistant</span>
       </div>
-      <div id="chat-messages" class="chat-messages">
-        <!-- Messages will be added here dynamically -->
-      </div>
+      <div id="chat-messages" class="chat-messages"></div>
       <div id="chat-composer" class="chat-composer">
         <textarea
           id="chat-manual-input"
           class="chat-manual-input"
           rows="1"
-          placeholder="Type context to add as You..."
+          placeholder="Type a message for AI..."
           aria-label="Manual context input"
         ></textarea>
-        <button id="chat-manual-send" class="chat-manual-send" type="button">Add</button>
+        <button id="chat-manual-send" class="chat-manual-send" type="button">Send</button>
       </div>
       <div id="chat-resize-handle" class="chat-resize-handle" aria-hidden="true"></div>
     </div>
-    
-    <!-- Hidden status text for feedback -->
+
     <div id="status-text" class="status-text" style="display: none;">AI Assistant</div>
-    
-    <!-- Expandable Results Panel (Legacy - now using chat) -->
+
+    <!-- Results Panel (Legacy) -->
     <div id="results-panel" class="results-panel hidden">
       <div class="results-header">
         <div class="results-title">
@@ -194,7 +178,7 @@
         <div id="result-text" class="result-text"></div>
       </div>
     </div>
-    
+
     <!-- Settings Panel -->
     <div id="settings-panel" class="settings-panel hidden">
       <div class="settings-header">
@@ -218,15 +202,7 @@
             <label class="settings-label">Anthropic API Key(s)</label>
             <div class="settings-input-row">
               <input type="password" id="setting-claude-key" class="settings-input" placeholder="Enter Anthropic API key(s), comma-separated..." />
-              <button
-                type="button"
-                id="toggle-claude-key-visibility"
-                class="settings-input-toggle"
-                aria-label="Show Claude API key"
-                aria-pressed="false"
-              >
-                Show
-              </button>
+              <button type="button" id="toggle-claude-key-visibility" class="settings-input-toggle" aria-label="Show Claude API key" aria-pressed="false">Show</button>
             </div>
             <div class="settings-helper-text">Multiple keys are supported as comma-separated values (automatic failover).</div>
           </div>
@@ -245,9 +221,7 @@
             <label class="settings-label">Ollama Model</label>
             <div class="settings-input-row">
               <input type="text" id="setting-ollama-model" class="settings-input" placeholder="llama3.2" />
-              <button type="button" id="fetch-ollama-models" class="settings-input-toggle" aria-label="Fetch available Ollama models">
-                Fetch
-              </button>
+              <button type="button" id="fetch-ollama-models" class="settings-input-toggle" aria-label="Fetch available Ollama models">Fetch</button>
             </div>
             <div class="settings-helper-text">Enter a model name or click Fetch to list installed models.</div>
             <select id="setting-ollama-model-select" class="settings-input hidden"></select>
@@ -261,15 +235,7 @@
           <label class="settings-label">AssemblyAI API Key</label>
           <div class="settings-input-row">
             <input type="password" id="setting-assembly-key" class="settings-input" placeholder="Enter AssemblyAI API key..." />
-            <button
-              type="button"
-              id="toggle-assembly-key-visibility"
-              class="settings-input-toggle"
-              aria-label="Show AssemblyAI API key"
-              aria-pressed="false"
-            >
-              Show
-            </button>
+            <button type="button" id="toggle-assembly-key-visibility" class="settings-input-toggle" aria-label="Show AssemblyAI API key" aria-pressed="false">Show</button>
           </div>
         </div>
         <div class="settings-group">
@@ -281,15 +247,17 @@
             <label class="settings-label" for="setting-window-opacity">Window Opacity</label>
             <span id="setting-window-opacity-value" class="settings-value-chip">10/10</span>
           </div>
-          <input
-            type="range"
-            id="setting-window-opacity"
-            class="settings-range"
-            min="1"
-            max="10"
-            step="1"
-            value="10"
-          />
+          <input type="range" id="setting-window-opacity" class="settings-range" min="1" max="10" step="1" value="10" />
+        </div>
+        <div class="settings-group">
+          <label class="settings-label" for="setting-auto-answer-debounce-ms">Auto Answer Quiet Period (ms)</label>
+          <input type="number" id="setting-auto-answer-debounce-ms" class="settings-input" min="250" step="50" value="1800" />
+          <div class="settings-helper-text">How long transcript activity must stay quiet before Auto Answer runs.</div>
+        </div>
+        <div class="settings-group">
+          <label class="settings-label" for="setting-auto-answer-cooldown-ms">Auto Answer Cooldown (ms)</label>
+          <input type="number" id="setting-auto-answer-cooldown-ms" class="settings-input" min="500" step="100" value="7000" />
+          <div class="settings-helper-text">How long Auto Answer waits after finishing before another transcript-driven refresh can run.</div>
         </div>
         <div class="settings-group">
           <label class="settings-label">Keyboard Shortcuts</label>
@@ -312,14 +280,6 @@
       </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" class="loading-overlay hidden">
-      <div class="loading-content">
-        <div class="analyzing-icon">&#x1F9E0;</div>
-        <div class="loading-text">Analyzing screen...</div>
-      </div>
-    </div>
-    
     <!-- Emergency Overlay -->
     <div id="emergency-overlay" class="emergency-overlay hidden">
       <div class="emergency-message">HIDDEN</div>

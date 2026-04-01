@@ -7,6 +7,8 @@ const OPTIONAL_ENV_DEFAULTS = Object.freeze({
   START_HIDDEN: 'false',
   MAX_SCREENSHOTS: '50',
   SCREENSHOT_DELAY: '300',
+  AUTO_ANSWER_DEBOUNCE_MS: '1800',
+  AUTO_ANSWER_COOLDOWN_MS: '7000',
   NODE_ENV: 'production',
   NODE_OPTIONS: '--max-old-space-size=4096'
 });
@@ -66,13 +68,16 @@ function parsePositiveInteger(value, defaultValue) {
 function normalizeApplicationEnvironment(source = {}) {
   const claudeApiKeys = normalizeClaudeApiKeys(
     source.claudeApiKey ?? source.claudeApiKeys ??
+    source.ANTHROPIC_API_KEY ?? source.ANTHROPIC_API_KEYS ??
     source.geminiApiKey ?? source.geminiApiKeys  // migrate old field name gracefully
   );
 
   return {
     claudeApiKey: claudeApiKeys.join(','),
     claudeApiKeys,
-    assemblyAiApiKey: String(source.assemblyAiApiKey || '').trim(),
+    assemblyAiApiKey: String(
+      source.assemblyAiApiKey ?? source.ASSEMBLY_AI_API_KEY ?? ''
+    ).trim(),
     hideFromScreenCapture: parseBoolean(
       source.HIDE_FROM_SCREEN_CAPTURE ?? source.hideFromScreenCapture,
       parseBoolean(OPTIONAL_ENV_DEFAULTS.HIDE_FROM_SCREEN_CAPTURE, true)
@@ -89,6 +94,14 @@ function normalizeApplicationEnvironment(source = {}) {
       source.SCREENSHOT_DELAY ?? source.screenshotDelay,
       parsePositiveInteger(OPTIONAL_ENV_DEFAULTS.SCREENSHOT_DELAY, 300)
     ),
+    autoAnswerDebounceMs: parsePositiveInteger(
+      source.AUTO_ANSWER_DEBOUNCE_MS ?? source.autoAnswerDebounceMs,
+      parsePositiveInteger(OPTIONAL_ENV_DEFAULTS.AUTO_ANSWER_DEBOUNCE_MS, 1800)
+    ),
+    autoAnswerCooldownMs: parsePositiveInteger(
+      source.AUTO_ANSWER_COOLDOWN_MS ?? source.autoAnswerCooldownMs,
+      parsePositiveInteger(OPTIONAL_ENV_DEFAULTS.AUTO_ANSWER_COOLDOWN_MS, 7000)
+    ),
     nodeEnv: String(source.NODE_ENV || source.nodeEnv || OPTIONAL_ENV_DEFAULTS.NODE_ENV).trim() || OPTIONAL_ENV_DEFAULTS.NODE_ENV,
     nodeOptions: String(source.NODE_OPTIONS || source.nodeOptions || OPTIONAL_ENV_DEFAULTS.NODE_OPTIONS).trim() || OPTIONAL_ENV_DEFAULTS.NODE_OPTIONS
   };
@@ -101,6 +114,8 @@ function syncProcessEnvironment(environment) {
   process.env.START_HIDDEN = String(environment.startHidden);
   process.env.MAX_SCREENSHOTS = String(environment.maxScreenshots);
   process.env.SCREENSHOT_DELAY = String(environment.screenshotDelay);
+  process.env.AUTO_ANSWER_DEBOUNCE_MS = String(environment.autoAnswerDebounceMs);
+  process.env.AUTO_ANSWER_COOLDOWN_MS = String(environment.autoAnswerCooldownMs);
   process.env.NODE_ENV = environment.nodeEnv;
   process.env.NODE_OPTIONS = environment.nodeOptions;
 }
@@ -142,6 +157,10 @@ function buildEnvironmentFileContent(environment) {
     '# Optional screenshot settings',
     `MAX_SCREENSHOTS=${environment.maxScreenshots}`,
     `SCREENSHOT_DELAY=${environment.screenshotDelay}`,
+    '',
+    '# Optional auto-answer timing',
+    `AUTO_ANSWER_DEBOUNCE_MS=${environment.autoAnswerDebounceMs}`,
+    `AUTO_ANSWER_COOLDOWN_MS=${environment.autoAnswerCooldownMs}`,
     '',
     '# Optional runtime settings',
     `NODE_ENV=${environment.nodeEnv}`,

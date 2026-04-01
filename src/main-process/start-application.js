@@ -120,6 +120,17 @@ async function startApplication() {
   function loadPersistedAppState() {
     appState = loadAppState(app);
 
+    const fallbackState = {};
+    if (!appState.claudeApiKey && appEnvironment?.claudeApiKey) {
+      fallbackState.claudeApiKey = appEnvironment.claudeApiKey;
+    }
+    if (!appState.assemblyAiApiKey && appEnvironment?.assemblyAiApiKey) {
+      fallbackState.assemblyAiApiKey = appEnvironment.assemblyAiApiKey;
+    }
+    if (Object.keys(fallbackState).length > 0) {
+      appState = saveAppState(app, fallbackState);
+    }
+
     const activeAiProvider = geminiRuntime.setActiveAiProvider(appState.aiProvider);
     const keyState = geminiRuntime.setKeys(
       normalizeClaudeApiKeys(appState?.claudeApiKey),

@@ -3,13 +3,13 @@
 }
 
 export function sourceLabel(source) {
-  return source === 'system' ? 'Host' : 'Mic';
+  return source === 'system' ? 'Meeting' : 'You';
 }
 
 export function createTranscriptionSourceState() {
   const selectedSources = {
     system: true,
-    mic: false
+    mic: true
   };
 
   const sourceStatuses = {

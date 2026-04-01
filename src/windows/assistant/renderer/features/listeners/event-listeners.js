@@ -12,11 +12,14 @@ export function setupEventListeners({
     sourceSystemToggle,
     sourceMicToggle,
     closeAppBtn,
+    moveAppBtn,
+    hideAppBtn,
     cancelCloseBtn,
     confirmCloseBtn,
     closeConfirmationDialog,
     chatMessagesElement,
     suggestBtn,
+    autoAnswerBtn,
     notesBtn,
     insightsBtn,
     themeToggleBtn,
@@ -44,8 +47,11 @@ export function setupEventListeners({
     openCloseConfirmation,
     closeCloseConfirmation,
     closeApplication,
+    moveWindowNext,
+    hideWindow,
     toggleChatMessageInclusion,
     getResponseSuggestions,
+    cycleAutoAnswerMode,
     generateMeetingNotes,
     getConversationInsights,
     toggleThemeMode,
@@ -57,8 +63,22 @@ export function setupEventListeners({
     if (analyzeBtn) analyzeBtn.addEventListener('click', askAiWithSessionContext);
     if (screenAiBtn) screenAiBtn.addEventListener('click', analyzeScreenshotsOnly);
     if (clearBtn) clearBtn.addEventListener('click', clearStealthData);
-    if (hideBtn) hideBtn.addEventListener('click', emergencyHide);
-    if (chatManualSend) chatManualSend.addEventListener('click', submitManualContextMessage);
+    if (hideBtn) hideBtn.addEventListener('click', hideWindow);
+    if (chatManualSend) {
+        chatManualSend.addEventListener('click', async () => {
+            const submitted = submitManualContextMessage();
+            if (!submitted) {
+                return;
+            }
+
+            try {
+                await askAiWithSessionContext();
+            } catch (error) {
+                console.error('Manual Ask AI trigger failed:', error);
+                addMonitorLog('error', 'manual-ask-ai-failed', error.message);
+            }
+        });
+    }
 
     if (chatManualInput) {
         chatManualInput.addEventListener('input', () => {
@@ -73,7 +93,15 @@ export function setupEventListeners({
 
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
-                submitManualContextMessage();
+                const submitted = submitManualContextMessage();
+                if (!submitted) {
+                    return;
+                }
+
+                askAiWithSessionContext().catch((error) => {
+                    console.error('Manual Ask AI trigger failed:', error);
+                    addMonitorLog('error', 'manual-ask-ai-failed', error.message);
+                });
             }
         });
 
@@ -105,6 +133,8 @@ export function setupEventListeners({
     }
 
     if (closeAppBtn) closeAppBtn.addEventListener('click', openCloseConfirmation);
+    if (moveAppBtn) moveAppBtn.addEventListener('click', moveWindowNext);
+    if (hideAppBtn) hideAppBtn.addEventListener('click', hideWindow);
     if (cancelCloseBtn) cancelCloseBtn.addEventListener('click', closeCloseConfirmation);
     if (confirmCloseBtn) confirmCloseBtn.addEventListener('click', closeApplication);
 
@@ -137,6 +167,7 @@ export function setupEventListeners({
     }
 
     if (suggestBtn) suggestBtn.addEventListener('click', getResponseSuggestions);
+    if (autoAnswerBtn) autoAnswerBtn.addEventListener('click', cycleAutoAnswerMode);
     if (notesBtn) notesBtn.addEventListener('click', generateMeetingNotes);
     if (insightsBtn) insightsBtn.addEventListener('click', getConversationInsights);
     if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleThemeMode);

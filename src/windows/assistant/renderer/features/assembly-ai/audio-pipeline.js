@@ -158,7 +158,7 @@ export function createAudioPipeline({ sendAudioChunk, addMonitorLog }) {
     sendAudioChunk(resolvedSource, pcm.buffer);
     audioChunkCounters[resolvedSource] += 1;
 
-    if (audioChunkCounters[resolvedSource] % 50 === 0) {
+    if (audioChunkCounters[resolvedSource] % 200 === 0) {
       addMonitorLog('info', 'chunk-heartbeat', `Chunks sent: ${audioChunkCounters[resolvedSource]}`, resolvedSource, {
         chunks: audioChunkCounters[resolvedSource],
         frameSamples: floatSamples.length

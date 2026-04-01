@@ -20,6 +20,8 @@ export function createSettingsPanelManager({
     settingAssemblyModel,
     settingWindowOpacity,
     settingWindowOpacityValue,
+    settingAutoAnswerDebounceMs,
+    settingAutoAnswerCooldownMs,
     applySettingsShortcutConfig,
     showFeedback,
     onSettingsSaved
@@ -32,6 +34,16 @@ export function createSettingsPanelManager({
         }
 
         return clamp(parsedValue, 1, 10);
+    }
+
+    function normalizePositiveInteger(value, fallbackValue, minValue = 1) {
+        const parsedValue = Number.parseInt(String(value ?? ''), 10);
+
+        if (!Number.isFinite(parsedValue)) {
+            return fallbackValue;
+        }
+
+        return Math.max(minValue, parsedValue);
     }
 
     function updateWindowOpacityValueLabel(value) {
@@ -274,6 +286,12 @@ export function createSettingsPanelManager({
                     settingWindowOpacity.value = normalizeWindowOpacityLevel(settings.windowOpacityLevel);
                 }
                 updateWindowOpacityValueLabel(settings.windowOpacityLevel);
+                if (settingAutoAnswerDebounceMs) {
+                    settingAutoAnswerDebounceMs.value = normalizePositiveInteger(settings.autoAnswerDebounceMs, 1800, 250);
+                }
+                if (settingAutoAnswerCooldownMs) {
+                    settingAutoAnswerCooldownMs.value = normalizePositiveInteger(settings.autoAnswerCooldownMs, 7000, 500);
+                }
             }
         } catch (error) {
             console.error('Failed to load settings:', error);
@@ -321,7 +339,9 @@ export function createSettingsPanelManager({
                 ollamaModel: settingOllamaModel ? settingOllamaModel.value.trim() : '',
                 programmingLanguage: settingProgrammingLanguage.value,
                 assemblyAiSpeechModel: settingAssemblyModel.value,
-                windowOpacityLevel: normalizeWindowOpacityLevel(settingWindowOpacity?.value)
+                windowOpacityLevel: normalizeWindowOpacityLevel(settingWindowOpacity?.value),
+                autoAnswerDebounceMs: normalizePositiveInteger(settingAutoAnswerDebounceMs?.value, 1800, 250),
+                autoAnswerCooldownMs: normalizePositiveInteger(settingAutoAnswerCooldownMs?.value, 7000, 500)
             };
 
             const result = await window.electronAPI.saveSettings(settings);

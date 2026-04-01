@@ -69,6 +69,24 @@ function createInvokeActions(ipcRenderer) {
       fallback: (error) => ({ error: error.message })
     }),
 
+    minimizeWindow: invokeWithFallback(ipcRenderer, {
+      channel: 'minimize-window',
+      label: 'minimizeWindow',
+      fallback: (error) => ({ error: error.message })
+    }),
+
+    moveWindowNext: invokeWithFallback(ipcRenderer, {
+      channel: 'move-window-next',
+      label: 'moveWindowNext',
+      fallback: (error) => ({ error: error.message })
+    }),
+
+    toggleWindowFullscreen: invokeWithFallback(ipcRenderer, {
+      channel: 'toggle-window-fullscreen',
+      label: 'toggleWindowFullscreen',
+      fallback: (error) => ({ error: error.message })
+    }),
+
     startVoiceRecognition: invokeWithFallback(ipcRenderer, {
       channel: 'start-voice-recognition',
       label: 'startVoiceRecognition',

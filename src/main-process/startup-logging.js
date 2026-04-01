@@ -26,6 +26,8 @@ function logStartupConfiguration({
   console.log(`  HIDE_FROM_SCREEN_CAPTURE: ${appEnvironment.hideFromScreenCapture}`);
   console.log(`  MAX_SCREENSHOTS: ${appEnvironment.maxScreenshots}`);
   console.log(`  SCREENSHOT_DELAY: ${appEnvironment.screenshotDelay}`);
+  console.log(`  AUTO_ANSWER_DEBOUNCE_MS: ${appEnvironment.autoAnswerDebounceMs}`);
+  console.log(`  AUTO_ANSWER_COOLDOWN_MS: ${appEnvironment.autoAnswerCooldownMs}`);
   console.log(`  NODE_ENV: ${appEnvironment.nodeEnv}`);
   console.log(`  NODE_OPTIONS: ${appEnvironment.nodeOptions}`);
   console.log(`  Default Claude model: ${defaultClaudeModel}`);

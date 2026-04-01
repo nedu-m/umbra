@@ -162,6 +162,18 @@
     return windowController.setWindowSizePreset(preset);
   });
 
+  ipcMain.handle('minimize-window', () => {
+    return windowController.minimizeWindow();
+  });
+
+  ipcMain.handle('move-window-next', () => {
+    return windowController.moveWindowToNextPosition();
+  });
+
+  ipcMain.handle('toggle-window-fullscreen', () => {
+    return windowController.toggleWindowFullscreen();
+  });
+
   ipcMain.handle('toggle-stealth', () => {
     return windowController.toggleStealthMode();
   });

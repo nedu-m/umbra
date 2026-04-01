@@ -59,7 +59,7 @@ export function createChatUiManager({
             minute: '2-digit'
         });
 
-        let icon = '\u2139\uFE0F';
+        let icon = 'Info';
         let label = '';
         let contentClass = 'message-content';
         let safeContent = escapeHtml(content);
@@ -67,27 +67,27 @@ export function createChatUiManager({
         switch (type) {
             case 'voice':
             case 'voice-mic':
-                icon = '\u{1F3A4}';
+                icon = 'You';
                 label = 'You';
                 break;
 
             case 'voice-system':
-                icon = '\u{1F50A}';
-                label = 'Host';
+                icon = 'Meeting';
+                label = 'Meeting';
                 break;
 
             case 'screenshot':
-                icon = '\u{1F4F8}';
+                icon = 'Screen';
                 break;
 
             case 'ai-response':
-                icon = '\u{1F916}';
+                icon = 'AI';
                 contentClass = 'message-content ai-response';
                 safeContent = formatResponse(content);
                 break;
 
             case 'system':
-                icon = '\u2139\uFE0F';
+                icon = 'Info';
                 contentClass = 'message-content system-message';
                 break;
         }
@@ -184,13 +184,13 @@ export function createChatUiManager({
 
     function submitManualContextMessage() {
         if (!chatManualInput) {
-            return;
+            return false;
         }
 
         const text = String(chatManualInput.value || '').trim();
         if (!text) {
             showFeedback?.('Type a message first', 'error');
-            return;
+            return false;
         }
 
         addChatMessage('voice-mic', text);
@@ -203,6 +203,7 @@ export function createChatUiManager({
         autoResizeManualInput();
         updateManualComposerState();
         chatManualInput.focus();
+        return true;
     }
 
     return {

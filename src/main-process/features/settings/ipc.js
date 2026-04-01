@@ -44,6 +44,8 @@ function registerSettingsIpc({
       keyboardShortcuts,
       hideFromScreenCapture: appEnvironment.hideFromScreenCapture,
       startHidden: appEnvironment.startHidden,
+      autoAnswerDebounceMs: appEnvironment.autoAnswerDebounceMs,
+      autoAnswerCooldownMs: appEnvironment.autoAnswerCooldownMs,
       windowOpacityLevel: windowController.getWindowOpacityLevel(),
       themePreference: appState?.themePreference === 'dark' || appState?.themePreference === 'light'
         ? appState.themePreference
@@ -89,6 +91,8 @@ function registerSettingsIpc({
         startHidden: appEnvironment.startHidden,
         maxScreenshots: appEnvironment.maxScreenshots,
         screenshotDelay: appEnvironment.screenshotDelay,
+        autoAnswerDebounceMs: settings.autoAnswerDebounceMs,
+        autoAnswerCooldownMs: settings.autoAnswerCooldownMs,
         nodeEnv: appEnvironment.nodeEnv,
         nodeOptions: appEnvironment.nodeOptions
       });

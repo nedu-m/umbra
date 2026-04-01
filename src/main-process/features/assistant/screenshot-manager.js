@@ -1,6 +1,10 @@
 ﻿const fs = require('fs');
 const path = require('path');
+const { nativeImage } = require('electron');
 const screenshot = require('screenshot-desktop');
+
+const CLAUDE_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+const CLAUDE_IMAGE_TARGET_BYTES = 4.5 * 1024 * 1024;
 
 function createScreenshotManager({ app, getMainWindow, getAppEnvironment, sendToRenderer }) {
   let screenshots = [];
@@ -53,6 +57,88 @@ function createScreenshotManager({ app, getMainWindow, getAppEnvironment, sendTo
     if (normalizedEntry && fs.existsSync(normalizedEntry.path)) {
       fs.unlinkSync(normalizedEntry.path);
     }
+  }
+
+  function detectImageMimeType(buffer) {
+    if (!Buffer.isBuffer(buffer) || buffer.length < 4) {
+      return null;
+    }
+
+    const isPng = (
+      buffer.length >= 8 &&
+      buffer[0] === 0x89 &&
+      buffer[1] === 0x50 &&
+      buffer[2] === 0x4E &&
+      buffer[3] === 0x47 &&
+      buffer[4] === 0x0D &&
+      buffer[5] === 0x0A &&
+      buffer[6] === 0x1A &&
+      buffer[7] === 0x0A
+    );
+
+    if (isPng) {
+      return 'image/png';
+    }
+
+    const isJpeg = (
+      buffer[0] === 0xFF &&
+      buffer[1] === 0xD8 &&
+      buffer[2] === 0xFF
+    );
+
+    if (isJpeg) {
+      return 'image/jpeg';
+    }
+
+    return null;
+  }
+
+  function buildClaudeInlineImageData(imagePath) {
+    const originalBuffer = fs.readFileSync(imagePath);
+    const detectedOriginalMimeType = detectImageMimeType(originalBuffer);
+
+    if (originalBuffer.length <= CLAUDE_IMAGE_TARGET_BYTES) {
+      return {
+        inlineData: {
+          data: originalBuffer.toString('base64'),
+          mimeType: detectedOriginalMimeType || 'image/png'
+        }
+      };
+    }
+
+    const sourceImage = nativeImage.createFromPath(imagePath);
+    if (sourceImage.isEmpty()) {
+      throw new Error(`Failed to load screenshot image: ${imagePath}`);
+    }
+
+    const originalSize = sourceImage.getSize();
+    const widthScaleFactors = [1, 0.85, 0.7, 0.55, 0.4];
+    const jpegQualities = [90, 80, 70, 60, 50, 40];
+
+    for (const scaleFactor of widthScaleFactors) {
+      const resizedImage = scaleFactor === 1
+        ? sourceImage
+        : sourceImage.resize({
+          width: Math.max(1, Math.round(originalSize.width * scaleFactor)),
+          quality: 'good'
+        });
+
+      for (const quality of jpegQualities) {
+        const jpegBuffer = resizedImage.toJPEG(quality);
+        if (jpegBuffer.length <= CLAUDE_IMAGE_TARGET_BYTES) {
+          return {
+            inlineData: {
+              data: jpegBuffer.toString('base64'),
+              mimeType: 'image/jpeg'
+            }
+          };
+        }
+      }
+    }
+
+    throw new Error(
+      `Screenshot is too large to analyze after compression: ${originalBuffer.length} bytes exceeds ${CLAUDE_IMAGE_MAX_BYTES} byte limit`
+    );
   }
 
   async function takeStealthScreenshot() {
@@ -144,15 +230,7 @@ function createScreenshotManager({ app, getMainWindow, getAppEnvironment, sendTo
       }
     }
 
-    const imageParts = usableEntries.map((entry) => {
-      const imageData = fs.readFileSync(entry.path);
-      return {
-        inlineData: {
-          data: imageData.toString('base64'),
-          mimeType: 'image/png'
-        }
-      };
-    });
+    const imageParts = usableEntries.map((entry) => buildClaudeInlineImageData(entry.path));
 
     return {
       imageParts,

@@ -4,8 +4,6 @@ export function setupIpcListeners({
     updateUi,
     addChatMessage,
     setAnalyzing,
-    showLoadingOverlay,
-    hideLoadingOverlay,
     showFeedback,
     showEmergencyOverlay,
     transcriptionManager,
@@ -33,7 +31,6 @@ export function setupIpcListeners({
 
     windowApi.onAnalysisStart(() => {
         setAnalyzing(true);
-        showLoadingOverlay();
         const stream = typeof getActiveScreenAiStream === 'function' ? getActiveScreenAiStream() : null;
         if (!stream) {
             addChatMessage('system', 'Analyzing screenshots...');
@@ -42,7 +39,6 @@ export function setupIpcListeners({
 
     windowApi.onAnalysisResult((data) => {
         setAnalyzing(false);
-        hideLoadingOverlay();
 
         const stream = typeof getActiveScreenAiStream === 'function' ? getActiveScreenAiStream() : null;
         console.log('[onAnalysisResult] stream active:', !!stream, 'has error:', !!data.error);

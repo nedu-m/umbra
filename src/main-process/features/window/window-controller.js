@@ -26,6 +26,7 @@ function createWindowController({
   let isRecoveryReloadInProgress = false;
   let lastRecoveryReloadAt = 0;
   let activeWindowOpacityLevel = DEFAULT_WINDOW_OPACITY_LEVEL;
+  let lastMovePosition = 'top';
 
   const RECOVERY_RELOAD_COOLDOWN_MS = 5000;
 
@@ -264,6 +265,34 @@ function createWindowController({
     sendToRenderer('set-stealth-mode', stealthModeEnabled);
   }
 
+  function minimizeWindow() {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      return { error: 'Main window not available' };
+    }
+
+    mainWindow.minimize();
+    return { success: true };
+  }
+
+  function moveWindowToNextPosition() {
+    const moveSequence = ['top', 'right', 'bottom', 'left'];
+    const currentIndex = moveSequence.indexOf(lastMovePosition);
+    const nextPosition = moveSequence[(currentIndex + 1) % moveSequence.length];
+    moveToPosition(nextPosition);
+    lastMovePosition = nextPosition;
+    return { success: true, position: nextPosition };
+  }
+
+  function toggleWindowFullscreen() {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+      return { error: 'Main window not available' };
+    }
+
+    const nextFullscreenState = !mainWindow.isFullScreen();
+    mainWindow.setFullScreen(nextFullscreenState);
+    return { success: true, isFullScreen: nextFullscreenState };
+  }
+
   function emergencyHide() {
     if (autoHideTimer) {
       clearTimeout(autoHideTimer);
@@ -319,6 +348,7 @@ function createWindowController({
         return;
     }
 
+    lastMovePosition = position;
     mainWindow.setPosition(x, y);
   }
 
@@ -483,10 +513,13 @@ function createWindowController({
     getWindowOpacityLevel,
     hasWindow,
     markVisible,
+    minimizeWindow,
+    moveWindowToNextPosition,
     registerShortcuts,
     setWindowSizePreset,
     setWindowBounds,
     setWindowOpacityLevel,
+    toggleWindowFullscreen,
     toggleStealthMode,
     unregisterShortcuts
   };

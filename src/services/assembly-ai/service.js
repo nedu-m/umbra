@@ -201,7 +201,7 @@ function createAssemblyAiService({
               sendToRenderer('vosk-status', {
                 source: resolvedSource,
                 status: 'listening',
-                message: `Listening (${resolvedSource === 'system' ? 'Host' : 'You'})...`
+                message: `Listening (${resolvedSource === 'system' ? 'Meeting' : 'You'})...`
               });
               break;
 

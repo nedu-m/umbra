@@ -241,7 +241,7 @@ export function createTranscriptionManager({
 
     async function startSelectedSources() {
         if (!selectedSources.system && !selectedSources.mic) {
-            const message = 'Select at least one source (Host or Mic) before starting transcription.';
+            const message = 'Select at least one source (Meeting or You) before starting transcription.';
             showFeedback(message, 'error');
             addMonitorLog('error', 'start-blocked', message);
             return;
@@ -303,7 +303,7 @@ export function createTranscriptionManager({
 
     async function startMicRecording() {
         if (isMicActive || sourceStatuses.mic === 'connecting') return;
-        setSourceStatus('mic', 'connecting', 'Connecting to mic...');
+        setSourceStatus('mic', 'connecting', 'Connecting to your mic...');
         addMonitorLog('info', 'start-request', 'Starting mic source', 'mic');
         resetFinalTranscriptBuffer('mic');
 
@@ -320,12 +320,12 @@ export function createTranscriptionManager({
             micScriptProcessor = await buildAudioProcessor(micAudioContext, micMediaStream, 'mic', () => isMicActive);
 
             setMicActive(true);
-            addChatMessage('system', 'Mic listening...');
-            showFeedback('Mic on', 'success');
-            addMonitorLog('info', 'source-active', 'Mic source active', 'mic');
+            addChatMessage('system', 'Listening to your microphone...');
+            showFeedback('You audio on', 'success');
+            addMonitorLog('info', 'source-active', 'Your microphone source active', 'mic');
         } catch (error) {
             console.error('Failed to start mic:', error);
-            showFeedback(`Mic failed: ${error.message}`, 'error');
+            showFeedback(`Your mic failed: ${error.message}`, 'error');
             addMonitorLog('error', 'source-failed', error.message, 'mic');
             stopAudioResources(micAudioContext, micMediaStream, micScriptProcessor);
             micAudioContext = null;
@@ -333,7 +333,7 @@ export function createTranscriptionManager({
             micScriptProcessor = null;
             setMicActive(false);
             resetSourceSampleQueue('mic');
-            setSourceStatus('mic', 'error', `Mic error: ${error.message}`);
+            setSourceStatus('mic', 'error', `Your mic error: ${error.message}`);
             try {
                 await window.electronAPI.stopVoiceRecognition('mic');
             } catch (_) {}
@@ -363,15 +363,15 @@ export function createTranscriptionManager({
         setMicActive(false);
         resetSourceSampleQueue('mic');
         audioPipeline.resetChunkCounter('mic');
-        setSourceStatus('mic', 'off', 'Mic stopped');
-        addMonitorLog('info', 'source-stopped', 'Mic source stopped', 'mic');
-        showFeedback('Mic off', 'info');
+        setSourceStatus('mic', 'off', 'Your mic stopped');
+        addMonitorLog('info', 'source-stopped', 'Your microphone source stopped', 'mic');
+        showFeedback('You audio off', 'info');
     }
 
     async function startSystemAudioRecording() {
         if (isSystemActive || sourceStatuses.system === 'connecting') return;
-        setSourceStatus('system', 'connecting', 'Connecting to host audio...');
-        addMonitorLog('info', 'start-request', 'Starting host audio source', 'system');
+        setSourceStatus('system', 'connecting', 'Connecting to meeting audio...');
+        addMonitorLog('info', 'start-request', 'Starting meeting audio source', 'system');
         resetFinalTranscriptBuffer('system');
 
         try {
@@ -398,9 +398,9 @@ export function createTranscriptionManager({
             systemScriptProcessor = await buildAudioProcessor(systemAudioContext, systemMediaStream, 'system', () => isSystemActive);
 
             setSystemActive(true);
-            addChatMessage('system', 'Listening to host audio...');
-            showFeedback('System audio on', 'success');
-            addMonitorLog('info', 'source-active', 'Host source active', 'system');
+            addChatMessage('system', 'Listening to meeting audio...');
+            showFeedback('Meeting audio on', 'success');
+            addMonitorLog('info', 'source-active', 'Meeting audio source active', 'system');
         } catch (error) {
             console.error('Failed to start system audio:', error);
             showFeedback(`System audio failed: ${error.message}`, 'error');
@@ -411,7 +411,7 @@ export function createTranscriptionManager({
             systemScriptProcessor = null;
             setSystemActive(false);
             resetSourceSampleQueue('system');
-            setSourceStatus('system', 'error', `Host error: ${error.message}`);
+            setSourceStatus('system', 'error', `Meeting audio error: ${error.message}`);
             try {
                 await window.electronAPI.stopVoiceRecognition('system');
             } catch (_) {}
@@ -441,18 +441,18 @@ export function createTranscriptionManager({
         setSystemActive(false);
         resetSourceSampleQueue('system');
         audioPipeline.resetChunkCounter('system');
-        setSourceStatus('system', 'off', 'Host source stopped');
-        addMonitorLog('info', 'source-stopped', 'Host source stopped', 'system');
-        showFeedback('System audio off', 'info');
+        setSourceStatus('system', 'off', 'Meeting audio stopped');
+        addMonitorLog('info', 'source-stopped', 'Meeting audio source stopped', 'system');
+        showFeedback('Meeting audio off', 'info');
     }
 
-    function createPartialDiv(icon) {
+    function createPartialDiv(sourceLabel) {
         const div = document.createElement('div');
         div.className = 'chat-message voice-message partial';
         const ts = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         div.innerHTML = `
         <div class="message-header">
-            <span class="message-icon">${icon}</span>
+            <span class="message-icon">${sourceLabel}</span>
             <span class="message-time">${ts}</span>
             <span class="partial-indicator">Live</span>
         </div>
@@ -468,21 +468,21 @@ export function createTranscriptionManager({
         if (!isSourceActive(source)) return;
 
         const trimmed = text.trim();
-        const icon = source === 'system' ? '\u{1F50A}' : '\u{1F3A4}';
+        const sourceLabel = source === 'system' ? 'Meeting' : 'You';
         monitorLastText[source] = `Live: ${trimmed}`;
         renderMonitorState();
 
         if (source === 'mic') {
             micPartialText = trimmed;
             if (!micPartialDiv) {
-                micPartialDiv = createPartialDiv(icon);
+                micPartialDiv = createPartialDiv(sourceLabel);
                 chatMessagesElement.appendChild(micPartialDiv);
             }
             micPartialDiv.querySelector('.message-content').textContent = trimmed;
         } else {
             systemPartialText = trimmed;
             if (!systemPartialDiv) {
-                systemPartialDiv = createPartialDiv(icon);
+                systemPartialDiv = createPartialDiv(sourceLabel);
                 chatMessagesElement.appendChild(systemPartialDiv);
             }
             systemPartialDiv.querySelector('.message-content').textContent = trimmed;
