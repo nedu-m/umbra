@@ -1,5 +1,5 @@
 // ============================================================================
-// OLLAMA AI SERVICE - Open-Cluely AI Assistant
+// OLLAMA AI SERVICE - Umbra
 // ============================================================================
 // Uses Ollama's OpenAI-compatible API for local LLM inference.
 // Implements the same public interface as GeminiService so the runtime

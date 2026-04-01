@@ -1,10 +1,10 @@
-# Open-Cluely
+# Umbra
 
-Open-Cluely is an Electron desktop copilot for technical interviews and live meetings. It combines AssemblyAI streaming transcription, screenshot capture, and Gemini-powered responses in a compact always-on-top window.
+Umbra is an Electron desktop copilot for technical interviews and live meetings. It combines AssemblyAI streaming transcription, screenshot capture, and Gemini-powered responses in a compact always-on-top window.
 
 Use it only in environments where recording, transcription, screenshots, and AI assistance are allowed.
 
-Open source alternative for Cluely and Parakeetai. Your Real-Time AI Interview Assistant 😉
+Real-time AI assistant for meetings and interviews.
 
 ## Looks
 
@@ -343,6 +343,3 @@ If you want to exclude generated artifacts while experimenting:
 ```powershell
 npx repomix . --style plain -o repomix-output.txt -i "repomix-output.txt,cache/**"
 ```
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=shubhamshnd/Open-Cluely&type=Date)](https://star-history.com/#shubhamshnd/Open-Cluely&Date)

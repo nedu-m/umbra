@@ -1,4 +1,4 @@
-# Open-Cluely Codebase Structure (Updated)
+# Umbra codebase structure (updated)
 
 This is the current architecture and file-ownership map for the repository.
 It is based on the actual code in `src/` after the renderer modular refactor.

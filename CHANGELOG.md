@@ -1,4 +1,4 @@
-# Open-Cluely Change Log
+# Umbra change log
 
 ## Current State
 
@@ -25,8 +25,8 @@ The main runtime issue that blocked transcription-based answers was the micropho
 
 Key files:
 
-- [src/bootstrap/environment.js](/Users/Edu/Projects/Open-Cluely/src/bootstrap/environment.js)
-- [src/main-process/start-application.js](/Users/Edu/Projects/Open-Cluely/src/main-process/start-application.js)
+- [src/bootstrap/environment.js](/Users/Edu/Projects/umbra/src/bootstrap/environment.js)
+- [src/main-process/start-application.js](/Users/Edu/Projects/umbra/src/main-process/start-application.js)
 
 ### 2. Screenshot upload fixes for Claude
 
@@ -41,7 +41,7 @@ This resolved:
 
 Key file:
 
-- [src/main-process/features/assistant/screenshot-manager.js](/Users/Edu/Projects/Open-Cluely/src/main-process/features/assistant/screenshot-manager.js)
+- [src/main-process/features/assistant/screenshot-manager.js](/Users/Edu/Projects/umbra/src/main-process/features/assistant/screenshot-manager.js)
 
 ### 3. Manual message flow
 
@@ -50,8 +50,8 @@ Key file:
 
 Key files:
 
-- [src/windows/assistant/renderer/features/chat/chat-ui-manager.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/chat/chat-ui-manager.js)
-- [src/windows/assistant/renderer/features/listeners/event-listeners.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/listeners/event-listeners.js)
+- [src/windows/assistant/renderer/features/chat/chat-ui-manager.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/chat/chat-ui-manager.js)
+- [src/windows/assistant/renderer/features/listeners/event-listeners.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/listeners/event-listeners.js)
 
 ### 4. macOS window controls and app chrome
 
@@ -61,13 +61,13 @@ Key files:
 
 Key files:
 
-- [src/windows/assistant/window.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/window.js)
-- [src/windows/assistant/renderer.html](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.html)
-- [src/windows/assistant/renderer.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.js)
-- [src/windows/assistant/styles.css](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/styles.css)
-- [src/windows/assistant/preload/actions.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/preload/actions.js)
-- [src/main-process/features/assistant/ipc.js](/Users/Edu/Projects/Open-Cluely/src/main-process/features/assistant/ipc.js)
-- [src/main-process/features/window/window-controller.js](/Users/Edu/Projects/Open-Cluely/src/main-process/features/window/window-controller.js)
+- [src/windows/assistant/window.js](/Users/Edu/Projects/umbra/src/windows/assistant/window.js)
+- [src/windows/assistant/renderer.html](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.html)
+- [src/windows/assistant/renderer.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.js)
+- [src/windows/assistant/styles.css](/Users/Edu/Projects/umbra/src/windows/assistant/styles.css)
+- [src/windows/assistant/preload/actions.js](/Users/Edu/Projects/umbra/src/windows/assistant/preload/actions.js)
+- [src/main-process/features/assistant/ipc.js](/Users/Edu/Projects/umbra/src/main-process/features/assistant/ipc.js)
+- [src/main-process/features/window/window-controller.js](/Users/Edu/Projects/umbra/src/main-process/features/window/window-controller.js)
 
 ### 5. macOS UI redesign
 
@@ -77,8 +77,8 @@ Key files:
 
 Key files:
 
-- [src/windows/assistant/renderer.html](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.html)
-- [src/windows/assistant/styles.css](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/styles.css)
+- [src/windows/assistant/renderer.html](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.html)
+- [src/windows/assistant/styles.css](/Users/Edu/Projects/umbra/src/windows/assistant/styles.css)
 
 ### 6. Toolbar simplification and fast-feel polish
 
@@ -117,9 +117,9 @@ What stayed stable:
 
 Key files:
 
-- [src/windows/assistant/renderer.html](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.html)
-- [src/windows/assistant/styles.css](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/styles.css)
-- [src/windows/assistant/renderer.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.js)
+- [src/windows/assistant/renderer.html](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.html)
+- [src/windows/assistant/styles.css](/Users/Edu/Projects/umbra/src/windows/assistant/styles.css)
+- [src/windows/assistant/renderer.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.js)
 
 ### 7. Labeling and UX clarity
 
@@ -134,11 +134,11 @@ Key files:
 
 Key files:
 
-- [src/windows/assistant/renderer.html](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.html)
-- [src/windows/assistant/renderer/features/assembly-ai/source-state.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/assembly-ai/source-state.js)
-- [src/windows/assistant/renderer/features/chat/chat-ui-manager.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/chat/chat-ui-manager.js)
-- [src/windows/assistant/renderer/features/ai-context/message-types.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/ai-context/message-types.js)
-- [src/windows/assistant/renderer/features/transcription/transcription-manager.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/transcription/transcription-manager.js)
+- [src/windows/assistant/renderer.html](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.html)
+- [src/windows/assistant/renderer/features/assembly-ai/source-state.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/assembly-ai/source-state.js)
+- [src/windows/assistant/renderer/features/chat/chat-ui-manager.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/chat/chat-ui-manager.js)
+- [src/windows/assistant/renderer/features/ai-context/message-types.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/ai-context/message-types.js)
+- [src/windows/assistant/renderer/features/transcription/transcription-manager.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/transcription/transcription-manager.js)
 
 ### 8. Transcription-driven auto answer
 
@@ -152,10 +152,10 @@ Key files:
 
 Key files:
 
-- [src/windows/assistant/renderer.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.js)
-- [src/windows/assistant/renderer/features/assembly-ai/source-state.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/assembly-ai/source-state.js)
-- [src/windows/assistant/renderer/features/transcription/transcription-manager.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/transcription/transcription-manager.js)
-- [src/windows/assistant/renderer/features/assembly-ai/transcript-buffer.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/assembly-ai/transcript-buffer.js)
+- [src/windows/assistant/renderer.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.js)
+- [src/windows/assistant/renderer/features/assembly-ai/source-state.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/assembly-ai/source-state.js)
+- [src/windows/assistant/renderer/features/transcription/transcription-manager.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/transcription/transcription-manager.js)
+- [src/windows/assistant/renderer/features/assembly-ai/transcript-buffer.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/assembly-ai/transcript-buffer.js)
 
 ## Runtime Behavior Now
 
@@ -198,10 +198,10 @@ Most of the noisy logging has now been removed, while useful lifecycle logging r
 
 Key files involved:
 
-- [src/windows/assistant/renderer.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer.js)
-- [src/windows/assistant/renderer/features/transcription/transcription-manager.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/transcription/transcription-manager.js)
-- [src/windows/assistant/renderer/features/assembly-ai/audio-pipeline.js](/Users/Edu/Projects/Open-Cluely/src/windows/assistant/renderer/features/assembly-ai/audio-pipeline.js)
-- [src/services/assembly-ai/service.js](/Users/Edu/Projects/Open-Cluely/src/services/assembly-ai/service.js)
+- [src/windows/assistant/renderer.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer.js)
+- [src/windows/assistant/renderer/features/transcription/transcription-manager.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/transcription/transcription-manager.js)
+- [src/windows/assistant/renderer/features/assembly-ai/audio-pipeline.js](/Users/Edu/Projects/umbra/src/windows/assistant/renderer/features/assembly-ai/audio-pipeline.js)
+- [src/services/assembly-ai/service.js](/Users/Edu/Projects/umbra/src/services/assembly-ai/service.js)
 
 ## Known Remaining Issues
 

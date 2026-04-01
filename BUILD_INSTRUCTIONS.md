@@ -42,7 +42,7 @@ Current state in this repo:
 
 Copy the icon files to the `assets/` folder:
 ```
-d:\Open-Cluely\assets\
+d:\umbra\assets\
   ├── chrome.ico   (Windows)
   ├── chrome.icns  (macOS)
   └── chrome.png   (Linux)
@@ -196,7 +196,7 @@ app.setLoginItemSettings({
 ## File Locations After Build
 
 ```
-d:\Open-Cluely\
+d:\umbra\
 ├── dist/
 │   ├── GoogleChrome.exe          ← Your built app
 │   ├── win-unpacked/             ← Unpacked files (can delete)

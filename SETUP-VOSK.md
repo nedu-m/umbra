@@ -1,6 +1,6 @@
 # Vosk Setup Guide
 
-This guide provides detailed instructions for setting up Vosk speech recognition in Open-Cluely.
+This guide provides detailed instructions for setting up Vosk speech recognition in Umbra.
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ pip install requests
 
 ### 2. Model Download
 
-When you first run Open-Cluely, it will automatically download the Vosk model (approximately 1.8GB). However, if you want to download it manually:
+When you first run Umbra, it will automatically download the Vosk model (approximately 1.8GB). However, if you want to download it manually:
 
 1. Create a models directory in your application folder
 2. Download the model from [Vosk's model repository](https://alphacephei.com/vosk/models)
@@ -140,7 +140,7 @@ print(sd.query_devices())
 ## Support
 
 If you encounter any issues not covered in this guide:
-1. Check the [GitHub Issues](https://github.com/yourusername/open-cluely/issues)
+1. Check the [GitHub Issues](https://github.com/yourusername/umbra/issues)
 2. Create a new issue with:
    - Your system information
    - Error messages

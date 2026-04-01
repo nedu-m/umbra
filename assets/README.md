@@ -43,7 +43,7 @@ If you have a Chrome PNG:
 
 After obtaining the icons, your folder should look like:
 ```
-d:\Open-Cluely\assets\
+d:\umbra\assets\
   ├── chrome.ico     ← Windows icon (REQUIRED for building)
   ├── chrome.icns    ← macOS icon (optional)
   ├── chrome.png     ← Linux icon (optional)

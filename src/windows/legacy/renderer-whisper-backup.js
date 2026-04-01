@@ -34,7 +34,7 @@ const hideBtn = document.getElementById('hide-btn');
 const copyBtn = document.getElementById('copy-btn');
 const closeResultsBtn = document.getElementById('close-results');
 
-// New Cluely-style buttons
+// Compact toolbar-style buttons
 const suggestBtn = document.getElementById('suggest-btn');
 const notesBtn = document.getElementById('notes-btn');
 const insightsBtn = document.getElementById('insights-btn');
@@ -685,7 +685,7 @@ function startTimer() {
     }, 1000);
 }
 
-// NEW CLUELY-STYLE FEATURES
+// Compact toolbar features
 
 // "What should I say?" feature
 async function getResponseSuggestions() {
@@ -788,7 +788,7 @@ function setupEventListeners() {
     if (closeResultsBtn) closeResultsBtn.addEventListener('click', hideResults);
     if (voiceToggle) voiceToggle.addEventListener('click', toggleVoiceRecognition);
 
-    // New Cluely-style feature buttons
+    // Compact toolbar feature buttons
     if (suggestBtn) suggestBtn.addEventListener('click', getResponseSuggestions);
     if (notesBtn) notesBtn.addEventListener('click', generateMeetingNotes);
     if (insightsBtn) insightsBtn.addEventListener('click', getConversationInsights);

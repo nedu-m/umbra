@@ -1035,7 +1035,7 @@ async function toggleWindowFullscreen() {
     }
 }
 
-// NEW CLUELY-STYLE FEATURES
+// Compact toolbar feature buttons
 
 async function getResponseSuggestions() {
     if (!hasClaudeApiKeysConfigured) {

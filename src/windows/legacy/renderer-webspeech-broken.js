@@ -29,7 +29,7 @@ const hideBtn = document.getElementById('hide-btn');
 const copyBtn = document.getElementById('copy-btn');
 const closeResultsBtn = document.getElementById('close-results');
 
-// New Cluely-style buttons
+// Compact toolbar-style buttons
 const suggestBtn = document.getElementById('suggest-btn');
 const notesBtn = document.getElementById('notes-btn');
 const insightsBtn = document.getElementById('insights-btn');
@@ -342,7 +342,7 @@ async function emergencyHide() {
     }
 }
 
-// NEW CLUELY-STYLE FEATURES
+// Compact toolbar features
 
 async function getResponseSuggestions() {
     if (!window.electronAPI || !window.electronAPI.suggestResponse) {

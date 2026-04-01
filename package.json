@@ -1,5 +1,5 @@
 {
-  "name": "stealth-meeting-assistant",
+  "name": "umbra",
   "version": "1.0.0",
   "description": "Invisible AI assistant for meetings - undetectable during screen share",
   "main": "src/main.js",
