@@ -28,6 +28,7 @@
   "build": {
     "appId": "com.google.chrome",
     "productName": "Google Chrome (2)",
+    "publish": null,
     "directories": {
       "output": "dist"
     },

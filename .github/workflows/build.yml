@@ -1,5 +1,9 @@
 # Matrix builds: Windows portable (.exe) + macOS DMG.
 # Artifacts: Actions tab → latest run → umbra-windows-latest / umbra-macos-latest
+#
+# Windows: node-window-manager pulls in extract-file-icon (node-gyp). First npm ci
+# can take several minutes compiling native code. Do not cancel early; "Terminate
+# batch job" in logs usually means the run was stopped manually or by a short timeout.
 
 name: Build
 
@@ -32,6 +36,7 @@ jobs:
             build_cmd: npm run build:mac
 
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +46,13 @@ jobs:
           node-version: '20'
           cache: npm
 
+      # So node-gyp can find MSVC (extract-file-icon, node-window-manager, postinstall rebuilds).
+      - name: Use MSVC (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       # electron-builder extraResources copies .env; repo only ships .env.example
       - name: Prepare .env for packaging
         shell: bash
@@ -49,8 +61,9 @@ jobs:
             cp .env.example .env 2>/dev/null || touch .env
           fi
 
+      # --foreground-scripts: avoid parallel lifecycle scripts (fewer Windows EPERM cleanups).
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --foreground-scripts --no-audit
 
       # package.json references assets/chrome.icns; only chrome.ico is in repo.
       # sips is unreliable when reading .ico repeatedly; decode once to PNG then resize.

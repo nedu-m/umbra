@@ -284,6 +284,8 @@ Triggers: **push** or **pull_request** to `main` or `master`, **push tags** matc
 
 If nothing runs after changing this file, confirm **Settings → Actions → General** allows workflows (not “Disable actions”), and that your default branch name matches `main` or `master` (or add it under `on.push.branches` in the workflow).
 
+On **Windows**, `npm ci` compiles native addons (`extract-file-icon` via `node-window-manager`). The first run often needs **several minutes**; canceling early produces `Terminate batch job (Y/N)?` and a failed `node-gyp rebuild`. Let the install step finish.
+
 ## Build
 
 The recommended Windows build is the portable executable:
