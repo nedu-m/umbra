@@ -146,10 +146,10 @@ npm run build:win
 This creates:
 
 ```text
-dist/GoogleChrome.exe
+dist/Umbra.exe
 ```
 
-You can then run the packaged app directly by double-clicking `dist/GoogleChrome.exe`.
+You can then run the packaged app directly by double-clicking `dist/Umbra.exe`.
 
 ### Native Windows Build Tools
 
@@ -273,18 +273,18 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 - `npm run start:hidden` launches it in background mode from source.
 - `npm run dev` enables Electron logging.
 - `npm run build:win` creates the portable Windows executable.
-- `npm run build:mac` creates macOS DMG(s) in `dist/`.
+- `npm run build:mac` creates a **universal** macOS DMG in `dist/` (Intel + Apple Silicon in one file).
 - `npm run build` runs the default `electron-builder` flow.
 
 ### CI (GitHub Actions)
 
-[`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. Artifacts are **only** the installable files: `dist/GoogleChrome.exe` (`umbra-windows-latest`) and `dist/*.dmg` (`umbra-macos-latest`), not the full `dist/` tree.
+[`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. Artifacts are **only** the installable files: `dist/Umbra.exe` (`umbra-windows-latest`) and `dist/*.dmg` (`umbra-macos-latest`), not the full `dist/` tree.
 
 **CI artifacts (every push / PR):** **Actions** → **Build** → latest green run → **Artifacts** → **umbra-macos-latest** / **umbra-windows-latest** (zip). These expire after GitHub’s artifact retention (often ~90 days).
 
 ### GitHub Releases (installers on the Releases page)
 
-[`.github/workflows/release.yml`](./.github/workflows/release.yml) runs on **`release: created`** (e.g. when you save a **draft** release) and again on **`release: published`**. Each time it builds on Windows and macOS and **uploads** `GoogleChrome.exe` and the `.dmg` file(s) to that release, so you can download binaries from a **draft** before clicking Publish. Publishing triggers a second run (same assets re-uploaded; harmless).
+[`.github/workflows/release.yml`](./.github/workflows/release.yml) runs on **`release: created`** (e.g. when you save a **draft** release) and again on **`release: published`**. Each time it builds on Windows and macOS and **uploads** `Umbra.exe` and the `.dmg` file(s) to that release, so you can download binaries from a **draft** before clicking Publish. Publishing triggers a second run (same assets re-uploaded; harmless).
 
 1. Bump **`version`** in [`package.json`](./package.json) to match the tag (e.g. `1.2.0` ↔ tag `v1.2.0`).
 2. Commit and push to the default branch.
@@ -310,7 +310,7 @@ npm run build:win
 Expected output:
 
 ```text
-dist/GoogleChrome.exe
+dist/Umbra.exe
 ```
 
 Notes:
@@ -318,10 +318,10 @@ Notes:
 - This is the recommended way to use the app outside development because it gives you a standalone `.exe` to launch directly.
 - `.env` is bundled as an extra resource during packaging.
 - The current Windows build is configured as a portable `x64` target with:
-  - Product name: `Google Chrome (2)`
-  - Executable name: `GoogleChrome.exe`
-  - App ID: `com.google.chrome`
-  - Publisher name: `Google LLC`
+  - Product name: `Umbra`
+  - Executable name: `Umbra.exe`
+  - App ID: `app.umbra.desktop`
+  - Publisher name: `Umbra`
 - If the build fails with a symlink privilege error, enable Windows Developer Mode or run the build from an elevated terminal.
 - The repo already includes [`assets/chrome.ico`](./assets/chrome.ico) for the Windows target. Add `assets/chrome.icns` and `assets/chrome.png` before relying on the macOS or Linux targets defined in `package.json`.
 
@@ -330,18 +330,18 @@ Notes:
 After building:
 
 1. Open the `dist/` folder.
-2. Run `GoogleChrome.exe`.
+2. Run `Umbra.exe`.
 3. If you want background launch behavior, either set `START_HIDDEN=true` before building or launch with:
 
 ```powershell
-.\dist\GoogleChrome.exe --start-hidden
+.\dist\Umbra.exe --start-hidden
 ```
 
 ### Build Checks
 
 After packaging, verify:
 
-- `dist/GoogleChrome.exe` exists
+- `dist/Umbra.exe` exists
 - the executable shows the Chrome icon
 - the app launches correctly without needing `npm start`
 

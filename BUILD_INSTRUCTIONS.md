@@ -55,7 +55,7 @@ d:\umbra\assets\
 npm run build:win
 ```
 
-This will create: `dist/GoogleChrome.exe`
+This will create: `dist/Umbra.exe`
 
 For this repo, this is the recommended build and does not require any extra icon download because `assets/chrome.ico` is already present.
 
@@ -65,7 +65,7 @@ For this repo, this is the recommended build and does not require any extra icon
 ```bash
 npm run build:win
 ```
-- Creates: `dist/GoogleChrome.exe`
+- Creates: `dist/Umbra.exe`
 - No installation required
 - Can be run from any location
 - No registry entries
@@ -74,7 +74,7 @@ npm run build:win
 ```bash
 npm run build -- --win nsis
 ```
-- Creates: `dist/Google Chrome (2) Setup.exe`
+- Creates: `dist/Umbra Setup <version>.exe` (exact name includes the version from `package.json`)
 - Installs to Program Files
 - Adds to Start Menu
 
@@ -92,14 +92,14 @@ The `.env` file will be automatically included in the build.
 
 ### Portable Version:
 1. Navigate to `dist/`
-2. Run `GoogleChrome.exe`
+2. Run `Umbra.exe`
 3. The app will run with Chrome icon and name
 
 ### Running in Background:
 The app is configured to:
 - Run with Chrome icon
-- Show as "Google Chrome (2)" in Task Manager
-- Be published by "Google LLC" (in properties)
+- Show as **Umbra** in Task Manager
+- Be published by **Umbra** (in properties)
 - Use portable mode (no installation)
 - Support hidden launch mode via `START_HIDDEN=true` or `--start-hidden`
 
@@ -107,18 +107,18 @@ The app is configured to:
 
 The app is configured with:
 
-- **Product Name**: Google Chrome (2)
-- **Executable Name**: GoogleChrome.exe
-- **App ID**: com.google.chrome
-- **Publisher**: Google LLC
+- **Product Name**: Umbra
+- **Executable Name**: Umbra.exe
+- **App ID**: app.umbra.desktop
+- **Publisher**: Umbra
 - **Icon**: Chrome logo
 - **Target**: Portable (no installer)
 
 ## Stealth Features
 
 ✅ Chrome icon in taskbar
-✅ "Google Chrome (2)" in Task Manager
-✅ Google LLC as publisher
+✅ **Umbra** in Task Manager
+✅ **Umbra** as publisher
 ✅ Portable (no installation traces)
 ✅ Runs in background
 ✅ Transparent overlay
@@ -128,19 +128,19 @@ The app is configured with:
 After building:
 
 1. **Check the file**:
-   - Name: `GoogleChrome.exe`
+   - Name: `Umbra.exe`
    - Icon: Chrome logo
-   - Location: `dist/GoogleChrome.exe`
+   - Location: `dist/Umbra.exe`
 
 2. **Run it**:
    ```bash
    cd dist
-   ./GoogleChrome.exe
+   ./Umbra.exe
    ```
 
 3. **Verify in Task Manager**:
    - Press `Ctrl + Shift + Esc`
-   - Look for "Google Chrome (2)"
+   - Look for **Umbra**
    - Should have Chrome icon
 
 ## Advanced: Custom Build Options
@@ -198,7 +198,7 @@ app.setLoginItemSettings({
 ```
 d:\umbra\
 ├── dist/
-│   ├── GoogleChrome.exe          ← Your built app
+│   ├── Umbra.exe          ← Your built app
 │   ├── win-unpacked/             ← Unpacked files (can delete)
 │   └── builder-debug.yml         ← Build logs
 ├── assets/
@@ -210,7 +210,7 @@ d:\umbra\
 ## Distribution
 
 To share the app:
-1. Copy `GoogleChrome.exe` from `dist/` folder
+1. Copy `Umbra.exe` from `dist/` folder
 2. Make sure `.env` with GEMINI_API_KEY is in the same directory
 3. Run the executable
 

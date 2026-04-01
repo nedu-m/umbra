@@ -26,8 +26,8 @@
     "esbuild": "^0.25.6"
   },
   "build": {
-    "appId": "com.google.chrome",
-    "productName": "Google Chrome (2)",
+    "appId": "app.umbra.desktop",
+    "productName": "Umbra",
     "publish": {
       "provider": "github"
     },
@@ -58,10 +58,7 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
+          "arch": ["universal"]
         }
       ],
       "entitlements": "assets/entitlements.mac.plist",
@@ -80,17 +77,17 @@
       "icon": "assets/chrome.ico",
       "requestedExecutionLevel": "asInvoker",
       "verifyUpdateCodeSignature": false,
-      "publisherName": "Google LLC",
+      "publisherName": "Umbra",
       "fileAssociations": []
     },
     "portable": {
-      "artifactName": "GoogleChrome.exe"
+      "artifactName": "Umbra.exe"
     },
     "linux": {
       "target": "AppImage",
       "icon": "assets/chrome.png"
     }
   },
-  "author": "Shubham",
+  "author": "Umbra",
   "license": "MIT"
 }

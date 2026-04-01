@@ -65,7 +65,7 @@ npm run build
 ```
 
 If successful, you should see:
-- `dist/GoogleChrome.exe` with Chrome icon
+- `dist/Umbra.exe` with Chrome icon
 - Icon visible in File Explorer
 - Icon shows in Task Manager
 

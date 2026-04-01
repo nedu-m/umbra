@@ -1,5 +1,5 @@
 # Matrix builds: Windows portable (.exe) + macOS DMG.
-# Artifacts: umbra-windows-latest (GoogleChrome.exe), umbra-macos-latest (*.dmg only —
+# Artifacts: umbra-windows-latest (Umbra.exe), umbra-macos-latest (*.dmg only —
 # not the whole dist/ tree, so downloads stay small).
 #
 # Windows: node-window-manager pulls in extract-file-icon (node-gyp). First npm ci
@@ -110,5 +110,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: umbra-windows-latest
-          path: dist/GoogleChrome.exe
+          path: dist/Umbra.exe
           if-no-files-found: error
