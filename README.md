@@ -324,6 +324,7 @@ Notes:
   - Publisher name: `Umbra`
 - If the build fails with a symlink privilege error, enable Windows Developer Mode or run the build from an elevated terminal.
 - The repo already includes [`assets/chrome.ico`](./assets/chrome.ico) for the Windows target. Add `assets/chrome.icns` and `assets/chrome.png` before relying on the macOS or Linux targets defined in `package.json`.
+- macOS: `npm run build:mac` writes `dist/Umbra-<version>-universal.dmg` (one binary for Intel and Apple Silicon). Older CI artifacts named `*-arm64.dmg` vs `*-x64.dmg` were easy to mix up; use a fresh universal build.
 
 ### Running The Built App
 
