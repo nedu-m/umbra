@@ -1,18 +1,19 @@
-# Builds installers and uploads them to the GitHub Release that was just published.
+# Builds installers and uploads them to the GitHub Release.
+# Runs on draft creation (assets on draft) and again when you publish (refresh/re-upload).
 # Prereq: package.json "version" must match the release tag (e.g. tag v1.2.3 → version 1.2.3).
 
 name: Release
 
 on:
   release:
-    types: [published]
+    types: [created, published]
 
 permissions:
   contents: write
 
 concurrency:
   group: release-${{ github.event.release.tag_name }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -84,5 +85,5 @@ jobs:
           sips -z 1024 1024 "$BASE" --out "$OUT/icon_512x512@2x.png"
           iconutil -c icns "$OUT" -o assets/chrome.icns
 
-      - name: Build and publish to GitHub Release
+      - name: Build and publish (${{ github.event.action }})
         run: ${{ matrix.cmd }}

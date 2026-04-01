@@ -282,18 +282,18 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 
 **CI artifacts (every push / PR):** **Actions** → **Build** → latest green run → **Artifacts** → **umbra-macos-latest** / **umbra-windows-latest** (zip). These expire after GitHub’s artifact retention (often ~90 days).
 
-### GitHub Releases (published installers)
+### GitHub Releases (installers on the Releases page)
 
-[`.github/workflows/release.yml`](./.github/workflows/release.yml) runs when you **publish** a GitHub Release (not for draft-only). It builds on Windows and macOS and **uploads** `GoogleChrome.exe` and the `.dmg` file(s) to that release.
+[`.github/workflows/release.yml`](./.github/workflows/release.yml) runs on **`release: created`** (e.g. when you save a **draft** release) and again on **`release: published`**. Each time it builds on Windows and macOS and **uploads** `GoogleChrome.exe` and the `.dmg` file(s) to that release, so you can download binaries from a **draft** before clicking Publish. Publishing triggers a second run (same assets re-uploaded; harmless).
 
 1. Bump **`version`** in [`package.json`](./package.json) to match the tag (e.g. `1.2.0` ↔ tag `v1.2.0`).
 2. Commit and push to the default branch.
-3. **GitHub → Releases → Draft a new release** → choose the tag (create `v1.2.0` if needed) → describe → **Publish release**.
-4. Wait for workflow **Release** to finish; refresh the release page for the attached assets.
+3. **GitHub → Releases → Draft a new release** → choose/create the tag → add notes → **Save draft** (workflow runs; check **Assets** on the draft) or **Publish release** (runs on publish too).
+4. Wait for workflow **Release** to finish; refresh the release page for attached files.
 
 `GITHUB_TOKEN` is used automatically; `permissions: contents: write` is set in the workflow. For a private org with restricted defaults, allow workflows to create releases.
 
-Triggers: **push** or **pull_request** to `main` or `master`, **push tags** matching `v*`, and **workflow_dispatch** (manual). The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
+**Build** workflow triggers: **push** or **pull_request** to `main` or `master`, and **workflow_dispatch**. The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
 
 If nothing runs after changing this file, confirm **Settings → Actions → General** allows workflows (not “Disable actions”), and that your default branch name matches `main` or `master` (or add it under `on.push.branches` in the workflow).
 

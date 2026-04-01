@@ -29,8 +29,7 @@
     "appId": "com.google.chrome",
     "productName": "Google Chrome (2)",
     "publish": {
-      "provider": "github",
-      "releaseType": "release"
+      "provider": "github"
     },
     "directories": {
       "output": "dist"
