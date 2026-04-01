@@ -52,7 +52,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # package.json references assets/chrome.icns; only chrome.ico is in repo
+      # package.json references assets/chrome.icns; only chrome.ico is in repo.
+      # sips is unreliable when reading .ico repeatedly; decode once to PNG then resize.
       - name: Generate macOS chrome.icns from chrome.ico
         if: runner.os == 'macOS'
         shell: bash
@@ -60,20 +61,24 @@ jobs:
           if [ -f assets/chrome.icns ]; then
             exit 0
           fi
-          set -e
-          SRC=assets/chrome.ico
+          set -euo pipefail
+          ICO=assets/chrome.ico
           OUT=/tmp/Umbra.iconset
+          rm -rf "$OUT"
           mkdir -p "$OUT"
-          sips -z 16 16     "$SRC" --out "$OUT/icon_16x16.png"
-          sips -z 32 32     "$SRC" --out "$OUT/icon_16x16@2x.png"
-          sips -z 32 32     "$SRC" --out "$OUT/icon_32x32.png"
-          sips -z 64 64     "$SRC" --out "$OUT/icon_32x32@2x.png"
-          sips -z 128 128   "$SRC" --out "$OUT/icon_128x128.png"
-          sips -z 256 256   "$SRC" --out "$OUT/icon_128x128@2x.png"
-          sips -z 256 256   "$SRC" --out "$OUT/icon_256x256.png"
-          sips -z 512 512   "$SRC" --out "$OUT/icon_256x256@2x.png"
-          sips -z 512 512   "$SRC" --out "$OUT/icon_512x512.png"
-          sips -z 1024 1024 "$SRC" --out "$OUT/icon_512x512@2x.png"
+          sips -s format png "$ICO" --out /tmp/umbra-icon-src.png
+          sips -z 1024 1024 /tmp/umbra-icon-src.png --out /tmp/umbra-icon-1024.png
+          BASE=/tmp/umbra-icon-1024.png
+          sips -z 16 16     "$BASE" --out "$OUT/icon_16x16.png"
+          sips -z 32 32     "$BASE" --out "$OUT/icon_16x16@2x.png"
+          sips -z 32 32     "$BASE" --out "$OUT/icon_32x32.png"
+          sips -z 64 64     "$BASE" --out "$OUT/icon_32x32@2x.png"
+          sips -z 128 128   "$BASE" --out "$OUT/icon_128x128.png"
+          sips -z 256 256   "$BASE" --out "$OUT/icon_128x128@2x.png"
+          sips -z 256 256   "$BASE" --out "$OUT/icon_256x256.png"
+          sips -z 512 512   "$BASE" --out "$OUT/icon_256x256@2x.png"
+          sips -z 512 512   "$BASE" --out "$OUT/icon_512x512.png"
+          sips -z 1024 1024 "$BASE" --out "$OUT/icon_512x512@2x.png"
           iconutil -c icns "$OUT" -o assets/chrome.icns
 
       - name: Build
