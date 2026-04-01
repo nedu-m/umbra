@@ -280,7 +280,9 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 
 [`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. It uploads `dist/` as artifacts (`umbra-windows-latest`, `umbra-macos-latest`).
 
-Triggers: **workflow_dispatch** (manual) and **push tags** matching `v*` (for example `v1.0.0`). The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
+Triggers: **push** or **pull_request** to `main` or `master`, **push tags** matching `v*`, and **workflow_dispatch** (manual). The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
+
+If nothing runs after changing this file, confirm **Settings → Actions → General** allows workflows (not “Disable actions”), and that your default branch name matches `main` or `master` (or add it under `on.push.branches` in the workflow).
 
 ## Build
 
