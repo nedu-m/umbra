@@ -24,7 +24,7 @@ jobs:
           - os: windows-latest
             cmd: npx electron-builder --win portable --publish always
           - os: macos-latest
-            cmd: npx electron-builder --mac dmg --publish always
+            cmd: npx electron-builder --mac dmg --universal --publish always
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
