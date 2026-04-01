@@ -19,18 +19,18 @@ function registerSettingsIpc({
   ipcMain.handle('get-settings', () => {
     const appEnvironment = getAppEnvironment();
     const appState = getAppState();
-    const geminiApiKey = typeof appState?.geminiApiKey === 'string' ? appState.geminiApiKey : '';
+    const claudeApiKey = typeof appState?.claudeApiKey === 'string' ? appState.claudeApiKey : '';
     const assemblyAiApiKey = typeof appState?.assemblyAiApiKey === 'string' ? appState.assemblyAiApiKey : '';
 
     return {
       aiProvider: geminiRuntime.getActiveAiProvider(),
-      geminiApiKey,
+      claudeApiKey,
       assemblyAiApiKey,
-      hasGeminiApiKeys: geminiApiKey.split(',').map((value) => value.trim()).filter(Boolean).length > 0,
+      hasClaudeApiKeys: claudeApiKey.split(',').map((value) => value.trim()).filter(Boolean).length > 0,
       hasAssemblyAiApiKey: assemblyAiApiKey.length > 0,
-      geminiModel: geminiRuntime.getActiveGeminiModel(),
-      geminiModels: geminiRuntime.getGeminiModels(),
-      defaultGeminiModel: geminiRuntime.getDefaultGeminiModel(),
+      claudeModel: geminiRuntime.getActiveClaudeModel(),
+      claudeModels: geminiRuntime.getClaudeModels(),
+      defaultClaudeModel: geminiRuntime.getDefaultClaudeModel(),
       ollamaBaseUrl: geminiRuntime.getActiveOllamaBaseUrl(),
       ollamaModel: geminiRuntime.getActiveOllamaModel(),
       defaultOllamaBaseUrl: geminiRuntime.getDefaultOllamaBaseUrl(),
@@ -75,9 +75,9 @@ function registerSettingsIpc({
     try {
       const appEnvironment = getAppEnvironment();
       const nextAiProvider = geminiRuntime.setActiveAiProvider(settings.aiProvider);
-      const nextGeminiApiKey = String(settings.geminiApiKey || '').trim();
+      const nextClaudeApiKey = String(settings.claudeApiKey || '').trim();
       const nextAssemblyAiApiKey = String(settings.assemblyAiApiKey || '').trim();
-      const nextGeminiModel = geminiRuntime.setActiveGeminiModel(settings.geminiModel);
+      const nextClaudeModel = geminiRuntime.setActiveClaudeModel(settings.claudeModel);
       const nextOllamaBaseUrl = geminiRuntime.setActiveOllamaBaseUrl(settings.ollamaBaseUrl);
       const nextOllamaModel = geminiRuntime.setActiveOllamaModel(settings.ollamaModel);
       const nextAssemblyModel = setAssemblyAiSpeechModel(settings.assemblyAiSpeechModel);
@@ -93,13 +93,13 @@ function registerSettingsIpc({
         nodeOptions: appEnvironment.nodeOptions
       });
 
-      const keyState = geminiRuntime.setKeys(nextGeminiApiKey, 0);
+      const keyState = geminiRuntime.setKeys(nextClaudeApiKey, 0);
       const updatedAppState = saveAppState(app, {
         aiProvider: nextAiProvider,
-        geminiApiKey: nextGeminiApiKey,
+        claudeApiKey: nextClaudeApiKey,
         assemblyAiApiKey: nextAssemblyAiApiKey,
-        geminiApiKeyIndex: keyState.activeApiKeyIndex,
-        geminiModel: nextGeminiModel,
+        claudeApiKeyIndex: keyState.activeApiKeyIndex,
+        claudeModel: nextClaudeModel,
         ollamaBaseUrl: nextOllamaBaseUrl,
         ollamaModel: nextOllamaModel,
         assemblyAiSpeechModel: nextAssemblyModel,
@@ -124,10 +124,10 @@ function registerSettingsIpc({
           nextProgrammingLanguage
         );
       } else {
-        console.log(`Applied Gemini API key index: ${keyState.activeApiKeyIndex + 1}/${keyState.geminiApiKeys.length}`);
-        geminiRuntime.initializeGeminiService(
+        console.log(`Applied Claude API key index: ${keyState.activeApiKeyIndex + 1}/${keyState.claudeApiKeys.length}`);
+        geminiRuntime.initializeClaudeService(
           keyState.activeApiKey,
-          nextGeminiModel,
+          nextClaudeModel,
           nextProgrammingLanguage
         );
       }

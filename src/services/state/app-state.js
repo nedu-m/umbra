@@ -7,10 +7,10 @@ const APP_STATE_FILE_NAME = 'app-state.json';
 function getDefaultAppState() {
   return {
     aiProvider: null,
-    geminiApiKey: null,
+    claudeApiKey: null,
     assemblyAiApiKey: null,
-    geminiApiKeyIndex: 0,
-    geminiModel: null,
+    claudeApiKeyIndex: 0,
+    claudeModel: null,
     ollamaBaseUrl: null,
     ollamaModel: null,
     assemblyAiSpeechModel: null,
@@ -25,13 +25,15 @@ function sanitizeAppState(state) {
 
   if (state && typeof state === 'object' && !Array.isArray(state)) {
     const aiProvider = String(state.aiProvider ?? '').trim().toLowerCase();
-    if (aiProvider === 'gemini' || aiProvider === 'ollama') {
+    if (aiProvider === 'claude' || aiProvider === 'ollama') {
       nextState.aiProvider = aiProvider;
     }
 
-    if (typeof state.geminiApiKey === 'string') {
-      const geminiApiKey = state.geminiApiKey.trim();
-      nextState.geminiApiKey = geminiApiKey || null;
+    // Support migrating from the old 'geminiApiKey' field name.
+    const claudeApiKeyRaw = state.claudeApiKey ?? state.geminiApiKey;
+    if (typeof claudeApiKeyRaw === 'string') {
+      const claudeApiKey = claudeApiKeyRaw.trim();
+      nextState.claudeApiKey = claudeApiKey || null;
     }
 
     if (typeof state.assemblyAiApiKey === 'string') {
@@ -39,13 +41,16 @@ function sanitizeAppState(state) {
       nextState.assemblyAiApiKey = assemblyAiApiKey || null;
     }
 
-    const geminiApiKeyIndex = Number.parseInt(String(state.geminiApiKeyIndex ?? ''), 10);
-    if (Number.isFinite(geminiApiKeyIndex) && geminiApiKeyIndex >= 0) {
-      nextState.geminiApiKeyIndex = geminiApiKeyIndex;
+    const claudeApiKeyIndex = Number.parseInt(
+      String(state.claudeApiKeyIndex ?? state.geminiApiKeyIndex ?? ''), 10
+    );
+    if (Number.isFinite(claudeApiKeyIndex) && claudeApiKeyIndex >= 0) {
+      nextState.claudeApiKeyIndex = claudeApiKeyIndex;
     }
 
-    if (typeof state.geminiModel === 'string' && state.geminiModel.trim()) {
-      nextState.geminiModel = state.geminiModel.trim();
+    const claudeModelRaw = state.claudeModel ?? state.geminiModel;
+    if (typeof claudeModelRaw === 'string' && claudeModelRaw.trim()) {
+      nextState.claudeModel = claudeModelRaw.trim();
     }
 
     if (typeof state.ollamaBaseUrl === 'string' && state.ollamaBaseUrl.trim()) {

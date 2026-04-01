@@ -11,7 +11,7 @@ const OPTIONAL_ENV_DEFAULTS = Object.freeze({
   NODE_OPTIONS: '--max-old-space-size=4096'
 });
 
-function normalizeGeminiApiKeys(value) {
+function normalizeClaudeApiKeys(value) {
   const sourceValues = Array.isArray(value)
     ? value
     : String(value ?? '').split(',');
@@ -30,6 +30,9 @@ function normalizeGeminiApiKeys(value) {
 
   return keys;
 }
+
+// Keep backward-compat alias for any code that still imports the old name.
+const normalizeGeminiApiKeys = normalizeClaudeApiKeys;
 
 function getEnvPath(app) {
   return app.isPackaged
@@ -61,13 +64,14 @@ function parsePositiveInteger(value, defaultValue) {
 }
 
 function normalizeApplicationEnvironment(source = {}) {
-  const geminiApiKeys = normalizeGeminiApiKeys(
-    source.geminiApiKey ?? source.geminiApiKeys
+  const claudeApiKeys = normalizeClaudeApiKeys(
+    source.claudeApiKey ?? source.claudeApiKeys ??
+    source.geminiApiKey ?? source.geminiApiKeys  // migrate old field name gracefully
   );
 
   return {
-    geminiApiKey: geminiApiKeys.join(','),
-    geminiApiKeys,
+    claudeApiKey: claudeApiKeys.join(','),
+    claudeApiKeys,
     assemblyAiApiKey: String(source.assemblyAiApiKey || '').trim(),
     hideFromScreenCapture: parseBoolean(
       source.HIDE_FROM_SCREEN_CAPTURE ?? source.hideFromScreenCapture,
@@ -91,7 +95,7 @@ function normalizeApplicationEnvironment(source = {}) {
 }
 
 function syncProcessEnvironment(environment) {
-  process.env.GEMINI_API_KEY = environment.geminiApiKey;
+  process.env.ANTHROPIC_API_KEY = environment.claudeApiKey;
   process.env.ASSEMBLY_AI_API_KEY = environment.assemblyAiApiKey;
   process.env.HIDE_FROM_SCREEN_CAPTURE = String(environment.hideFromScreenCapture);
   process.env.START_HIDDEN = String(environment.startHidden);
@@ -163,7 +167,8 @@ module.exports = {
   buildEnvironmentFileContent,
   getEnvPath,
   loadApplicationEnvironment,
-  normalizeGeminiApiKeys,
+  normalizeClaudeApiKeys,
+  normalizeGeminiApiKeys,  // backward-compat alias
   normalizeApplicationEnvironment,
   saveApplicationEnvironment
 };

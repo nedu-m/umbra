@@ -114,11 +114,11 @@ const settingsPanel = document.getElementById('settings-panel');
 const closeSettingsBtn = document.getElementById('close-settings');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
 const settingAiProvider = document.getElementById('setting-ai-provider');
-const geminiSettingsGroup = document.getElementById('gemini-settings-group');
+const claudeSettingsGroup = document.getElementById('claude-settings-group');
 const ollamaSettingsGroup = document.getElementById('ollama-settings-group');
-const settingGeminiKey = document.getElementById('setting-gemini-key');
-const toggleGeminiKeyVisibilityBtn = document.getElementById('toggle-gemini-key-visibility');
-const settingGeminiModel = document.getElementById('setting-gemini-model');
+const settingClaudeKey = document.getElementById('setting-claude-key');
+const toggleClaudeKeyVisibilityBtn = document.getElementById('toggle-claude-key-visibility');
+const settingClaudeModel = document.getElementById('setting-claude-model');
 const settingOllamaBaseUrl = document.getElementById('setting-ollama-base-url');
 const settingOllamaModel = document.getElementById('setting-ollama-model');
 const settingOllamaModelSelect = document.getElementById('setting-ollama-model-select');
@@ -139,7 +139,7 @@ const MIN_WINDOW_HEIGHT = 380;
 const MAX_CHAT_INPUT_HEIGHT = 88;
 
 let isCloseConfirmationOpen = false;
-let hasGeminiApiKeysConfigured = false;
+let hasClaudeApiKeysConfigured = false;
 let hasAssemblyAiApiKeyConfigured = false;
 const aiActionInFlightState = {
     askAi: false,
@@ -177,11 +177,11 @@ const chatUiManager = createChatUiManager({
 const settingsPanelManager = createSettingsPanelManager({
     settingsPanel,
     settingAiProvider,
-    geminiSettingsGroup,
+    claudeSettingsGroup,
     ollamaSettingsGroup,
-    settingGeminiKey,
-    toggleGeminiKeyVisibilityBtn,
-    settingGeminiModel,
+    settingClaudeKey,
+    toggleClaudeKeyVisibilityBtn,
+    settingClaudeModel,
     settingProgrammingLanguage,
     settingOllamaBaseUrl,
     settingOllamaModel,
@@ -426,7 +426,7 @@ function createStreamHandler(actionId) {
     return { start, finalize, cleanup };
 }
 
-function hasConfiguredGeminiApiKeys(value) {
+function hasConfiguredClaudeApiKeys(value) {
     const keys = String(value ?? '')
         .split(',')
         .map((entry) => entry.trim())
@@ -440,18 +440,18 @@ function hasConfiguredAssemblyAiApiKey(value) {
 
 function applyApiKeyAvailabilityFromSettings(settings) {
     if (!settings || typeof settings !== 'object') {
-        hasGeminiApiKeysConfigured = false;
+        hasClaudeApiKeysConfigured = false;
         hasAssemblyAiApiKeyConfigured = false;
         return;
     }
 
     // Ollama doesn't require API keys, so treat it as always configured
     if (settings.aiProvider === 'ollama') {
-        hasGeminiApiKeysConfigured = true;
-    } else if (typeof settings.hasGeminiApiKeys === 'boolean') {
-        hasGeminiApiKeysConfigured = settings.hasGeminiApiKeys;
+        hasClaudeApiKeysConfigured = true;
+    } else if (typeof settings.hasClaudeApiKeys === 'boolean') {
+        hasClaudeApiKeysConfigured = settings.hasClaudeApiKeys;
     } else {
-        hasGeminiApiKeysConfigured = hasConfiguredGeminiApiKeys(settings.geminiApiKey);
+        hasClaudeApiKeysConfigured = hasConfiguredClaudeApiKeys(settings.claudeApiKey);
     }
 
     if (typeof settings.hasAssemblyAiApiKey === 'boolean') {
@@ -576,8 +576,8 @@ function buildAskAiContextPayload() {
 }
 
 async function askAiWithSessionContext() {
-    if (!hasGeminiApiKeysConfigured) {
-        showFeedback('Gemini API key missing. Add it in Settings.', 'error');
+    if (!hasClaudeApiKeysConfigured) {
+        showFeedback('Claude API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -623,8 +623,8 @@ async function askAiWithSessionContext() {
 }
 
 async function analyzeScreenshotsOnly() {
-    if (!hasGeminiApiKeysConfigured) {
-        showFeedback('Gemini API key missing. Add it in Settings.', 'error');
+    if (!hasClaudeApiKeysConfigured) {
+        showFeedback('Claude API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -721,8 +721,8 @@ async function closeApplication() {
 // NEW CLUELY-STYLE FEATURES
 
 async function getResponseSuggestions() {
-    if (!hasGeminiApiKeysConfigured) {
-        showFeedback('Gemini API key missing. Add it in Settings.', 'error');
+    if (!hasClaudeApiKeysConfigured) {
+        showFeedback('Claude API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -766,8 +766,8 @@ async function getResponseSuggestions() {
 }
 
 async function generateMeetingNotes() {
-    if (!hasGeminiApiKeysConfigured) {
-        showFeedback('Gemini API key missing. Add it in Settings.', 'error');
+    if (!hasClaudeApiKeysConfigured) {
+        showFeedback('Claude API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -811,8 +811,8 @@ async function generateMeetingNotes() {
 }
 
 async function getConversationInsights() {
-    if (!hasGeminiApiKeysConfigured) {
-        showFeedback('Gemini API key missing. Add it in Settings.', 'error');
+    if (!hasClaudeApiKeysConfigured) {
+        showFeedback('Claude API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -891,7 +891,7 @@ function updateUI() {
     const hasTranscriptContext = aiBundle.transcriptContext.length > 0;
     const hasEnabledScreenshots = aiBundle.enabledScreenshotIds.length > 0;
     const hasAiContext = hasTranscriptContext || hasEnabledScreenshots || aiBundle.contextString.length > 0;
-    const canRunAiActions = hasGeminiApiKeysConfigured;
+    const canRunAiActions = hasClaudeApiKeysConfigured;
     const canRunTranscription = hasAssemblyAiApiKeyConfigured;
     const askAiInFlight = isAiActionInFlight('askAi');
     const screenAiInFlight = isAiActionInFlight('screenAi');

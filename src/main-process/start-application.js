@@ -10,7 +10,7 @@ const WebSocket = require('ws');
 
 const {
   loadApplicationEnvironment,
-  normalizeGeminiApiKeys,
+  normalizeClaudeApiKeys,
   saveApplicationEnvironment
 } = require('../bootstrap/environment');
 const {
@@ -26,7 +26,7 @@ const {
 } = require('../services/state/app-state');
 const { createAssistantWindow } = require('../windows/assistant/window');
 const { createSafeSender } = require('./shared/safe-send');
-const { createGeminiRuntime } = require('./features/assistant/gemini-runtime');
+const { createClaudeRuntime } = require('./features/assistant/claude-runtime');
 const { createScreenshotManager } = require('./features/assistant/screenshot-manager');
 const { registerAssistantIpc } = require('./features/assistant/ipc');
 const { createAssemblyAiService } = require('../services/assembly-ai/service');
@@ -55,7 +55,7 @@ async function startApplication() {
   let isShuttingDown = false;
   const startupOptions = resolveStartupOptions();
 
-  const geminiRuntime = createGeminiRuntime();
+  const geminiRuntime = createClaudeRuntime();
 
   const assemblyAiSpeechModels = getAssemblyAiSpeechModels();
   const defaultAssemblyAiSpeechModel = getDefaultAssemblyAiSpeechModel();
@@ -122,10 +122,10 @@ async function startApplication() {
 
     const activeAiProvider = geminiRuntime.setActiveAiProvider(appState.aiProvider);
     const keyState = geminiRuntime.setKeys(
-      normalizeGeminiApiKeys(appState?.geminiApiKey),
-      appState.geminiApiKeyIndex
+      normalizeClaudeApiKeys(appState?.claudeApiKey),
+      appState.claudeApiKeyIndex
     );
-    const activeGeminiModel = geminiRuntime.setActiveGeminiModel(appState.geminiModel);
+    const activeClaudeModel = geminiRuntime.setActiveClaudeModel(appState.claudeModel);
     const activeOllamaBaseUrl = geminiRuntime.setActiveOllamaBaseUrl(appState.ollamaBaseUrl);
     const activeOllamaModel = geminiRuntime.setActiveOllamaModel(appState.ollamaModel);
     activeAssemblyAiSpeechModel = resolveAssemblyAiSpeechModel(appState.assemblyAiSpeechModel);
@@ -134,8 +134,8 @@ async function startApplication() {
 
     if (
       appState.aiProvider !== activeAiProvider ||
-      appState.geminiApiKeyIndex !== keyState.activeApiKeyIndex ||
-      appState.geminiModel !== activeGeminiModel ||
+      appState.claudeApiKeyIndex !== keyState.activeApiKeyIndex ||
+      appState.claudeModel !== activeClaudeModel ||
       appState.ollamaBaseUrl !== activeOllamaBaseUrl ||
       appState.ollamaModel !== activeOllamaModel ||
       appState.assemblyAiSpeechModel !== activeAssemblyAiSpeechModel ||
@@ -144,8 +144,8 @@ async function startApplication() {
     ) {
       appState = saveAppState(app, {
         aiProvider: activeAiProvider,
-        geminiApiKeyIndex: keyState.activeApiKeyIndex,
-        geminiModel: activeGeminiModel,
+        claudeApiKeyIndex: keyState.activeApiKeyIndex,
+        claudeModel: activeClaudeModel,
         ollamaBaseUrl: activeOllamaBaseUrl,
         ollamaModel: activeOllamaModel,
         assemblyAiSpeechModel: activeAssemblyAiSpeechModel,
@@ -156,8 +156,8 @@ async function startApplication() {
 
     console.log('Loaded app state from:', getAppStatePath(app));
     console.log('Restored AI provider from app state:', activeAiProvider);
-    console.log(`Restored Gemini API key index from app state: ${keyState.activeApiKeyIndex + 1}/${keyState.geminiApiKeys.length}`);
-    console.log('Restored Gemini model from app state:', activeGeminiModel);
+    console.log(`Restored Claude API key index from app state: ${keyState.activeApiKeyIndex + 1}/${keyState.claudeApiKeys.length}`);
+    console.log('Restored Claude model from app state:', activeClaudeModel);
     console.log('Restored Ollama config from app state:', activeOllamaModel, 'at', activeOllamaBaseUrl);
     console.log('Restored AssemblyAI speech model from app state:', activeAssemblyAiSpeechModel);
     console.log('Restored programming language from app state:', activeProgrammingLanguage);
@@ -242,8 +242,8 @@ async function startApplication() {
     logStartupConfiguration({
       appEnvironment,
       appState,
-      geminiModels: geminiRuntime.getGeminiModels(),
-      defaultGeminiModel: geminiRuntime.getDefaultGeminiModel(),
+      claudeModels: geminiRuntime.getClaudeModels(),
+      defaultClaudeModel: geminiRuntime.getDefaultClaudeModel(),
       assemblyAiSpeechModels,
       defaultAssemblyAiSpeechModel,
       programmingLanguages: geminiRuntime.getProgrammingLanguages(),
@@ -251,12 +251,12 @@ async function startApplication() {
     });
 
     geminiRuntime.setActiveKeyIndexChangeHandler((nextIndex) => {
-      if (!appState || appState.geminiApiKeyIndex === nextIndex) {
+      if (!appState || appState.claudeApiKeyIndex === nextIndex) {
         return;
       }
 
-      appState = saveAppState(app, { geminiApiKeyIndex: nextIndex });
-      console.log(`Persisted Gemini API key index: ${nextIndex + 1}/${geminiRuntime.getApiKeys().length}`);
+      appState = saveAppState(app, { claudeApiKeyIndex: nextIndex });
+      console.log(`Persisted Claude API key index: ${nextIndex + 1}/${geminiRuntime.getApiKeys().length}`);
     });
 
     if (geminiRuntime.getActiveAiProvider() === 'ollama') {
@@ -266,9 +266,9 @@ async function startApplication() {
         geminiRuntime.getActiveProgrammingLanguage()
       );
     } else {
-      geminiRuntime.initializeGeminiService(
+      geminiRuntime.initializeClaudeService(
         geminiRuntime.getActiveApiKey(),
-        geminiRuntime.getActiveGeminiModel(),
+        geminiRuntime.getActiveClaudeModel(),
         geminiRuntime.getActiveProgrammingLanguage()
       );
     }

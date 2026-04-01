@@ -7,12 +7,13 @@
     "start": "electron .",
     "start:hidden": "electron . --start-hidden",
     "build": "electron-builder",
+    "build:mac": "electron-builder --mac dmg",
     "build:win": "electron-builder --win portable",
     "dev": "electron . --enable-logging",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@anthropic-ai/sdk": "^0.39.0",
     "dotenv": "^16.3.1",
     "node-window-manager": "^2.2.4",
     "screenshot-desktop": "^1.15.0",
@@ -49,7 +50,19 @@
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "assets/chrome.icns"
+      "icon": "assets/chrome.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist",
+      "hardenedRuntime": false
     },
     "win": {
       "target": [

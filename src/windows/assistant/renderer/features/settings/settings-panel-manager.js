@@ -5,11 +5,11 @@ function clamp(value, min, max) {
 export function createSettingsPanelManager({
     settingsPanel,
     settingAiProvider,
-    geminiSettingsGroup,
+    claudeSettingsGroup,
     ollamaSettingsGroup,
-    settingGeminiKey,
-    toggleGeminiKeyVisibilityBtn,
-    settingGeminiModel,
+    settingClaudeKey,
+    toggleClaudeKeyVisibilityBtn,
+    settingClaudeModel,
     settingProgrammingLanguage,
     settingOllamaBaseUrl,
     settingOllamaModel,
@@ -71,13 +71,13 @@ export function createSettingsPanelManager({
     }
 
     function updateProviderVisibility(provider) {
-        const isGemini = provider !== 'ollama';
+        const isClaude = provider !== 'ollama';
 
-        if (geminiSettingsGroup) {
-            geminiSettingsGroup.classList.toggle('hidden', !isGemini);
+        if (claudeSettingsGroup) {
+            claudeSettingsGroup.classList.toggle('hidden', !isClaude);
         }
         if (ollamaSettingsGroup) {
-            ollamaSettingsGroup.classList.toggle('hidden', isGemini);
+            ollamaSettingsGroup.classList.toggle('hidden', isClaude);
         }
     }
 
@@ -163,26 +163,26 @@ export function createSettingsPanelManager({
         });
     }
 
-    function populateGeminiModelOptions(models, selectedModel) {
-        if (!settingGeminiModel) {
+    function populateClaudeModelOptions(models, selectedModel) {
+        if (!settingClaudeModel) {
             return;
         }
 
-        settingGeminiModel.innerHTML = '';
+        settingClaudeModel.innerHTML = '';
 
         const configuredModels = Array.isArray(models) ? models : [];
         if (configuredModels.length === 0) {
-            throw new Error('Gemini models are not configured.');
+            throw new Error('Claude models are not configured.');
         }
 
         configuredModels.forEach((modelName) => {
             const option = document.createElement('option');
             option.value = modelName;
             option.textContent = modelName;
-            settingGeminiModel.appendChild(option);
+            settingClaudeModel.appendChild(option);
         });
 
-        settingGeminiModel.value = configuredModels.includes(selectedModel)
+        settingClaudeModel.value = configuredModels.includes(selectedModel)
             ? selectedModel
             : configuredModels[0];
     }
@@ -252,9 +252,9 @@ export function createSettingsPanelManager({
                 }
                 updateProviderVisibility(activeProvider);
 
-                // Gemini settings
-                if (settingGeminiKey) settingGeminiKey.value = settings.geminiApiKey || '';
-                populateGeminiModelOptions(settings.geminiModels, settings.geminiModel || settings.defaultGeminiModel);
+                // Claude settings
+                if (settingClaudeKey) settingClaudeKey.value = settings.claudeApiKey || '';
+                populateClaudeModelOptions(settings.claudeModels, settings.claudeModel || settings.defaultClaudeModel);
 
                 // Ollama settings
                 if (settingOllamaBaseUrl) settingOllamaBaseUrl.value = settings.ollamaBaseUrl || 'http://localhost:11434';
@@ -279,7 +279,7 @@ export function createSettingsPanelManager({
             console.error('Failed to load settings:', error);
         }
 
-        setApiKeyFieldVisibility(settingGeminiKey, toggleGeminiKeyVisibilityBtn, 'Gemini', false);
+        setApiKeyFieldVisibility(settingClaudeKey, toggleClaudeKeyVisibilityBtn, 'Claude', false);
         setApiKeyFieldVisibility(settingAssemblyKey, toggleAssemblyKeyVisibilityBtn, 'AssemblyAI', false);
 
         settingsPanel.classList.remove('hidden');
@@ -290,7 +290,7 @@ export function createSettingsPanelManager({
             settingsPanel.classList.add('hidden');
         }
 
-        setApiKeyFieldVisibility(settingGeminiKey, toggleGeminiKeyVisibilityBtn, 'Gemini', false);
+        setApiKeyFieldVisibility(settingClaudeKey, toggleClaudeKeyVisibilityBtn, 'Claude', false);
         setApiKeyFieldVisibility(settingAssemblyKey, toggleAssemblyKeyVisibilityBtn, 'AssemblyAI', false);
     }
 
@@ -298,9 +298,9 @@ export function createSettingsPanelManager({
         try {
             const aiProvider = settingAiProvider ? settingAiProvider.value : 'gemini';
 
-            if (aiProvider === 'gemini') {
-                if (!settingGeminiModel || settingGeminiModel.options.length === 0) {
-                    throw new Error('Gemini models are not configured.');
+            if (aiProvider === 'claude') {
+                if (!settingClaudeModel || settingClaudeModel.options.length === 0) {
+                    throw new Error('Claude models are not configured.');
                 }
             }
 
@@ -314,9 +314,9 @@ export function createSettingsPanelManager({
 
             const settings = {
                 aiProvider,
-                geminiApiKey: settingGeminiKey ? settingGeminiKey.value.trim() : '',
+                claudeApiKey: settingClaudeKey ? settingClaudeKey.value.trim() : '',
                 assemblyAiApiKey: settingAssemblyKey ? settingAssemblyKey.value.trim() : '',
-                geminiModel: settingGeminiModel ? settingGeminiModel.value : '',
+                claudeModel: settingClaudeModel ? settingClaudeModel.value : '',
                 ollamaBaseUrl: settingOllamaBaseUrl ? settingOllamaBaseUrl.value.trim() : '',
                 ollamaModel: settingOllamaModel ? settingOllamaModel.value.trim() : '',
                 programmingLanguage: settingProgrammingLanguage.value,
@@ -342,7 +342,7 @@ export function createSettingsPanelManager({
         }
     }
 
-    bindApiKeyVisibilityToggle(settingGeminiKey, toggleGeminiKeyVisibilityBtn, 'Gemini');
+    bindApiKeyVisibilityToggle(settingClaudeKey, toggleClaudeKeyVisibilityBtn, 'Claude');
     bindApiKeyVisibilityToggle(settingAssemblyKey, toggleAssemblyKeyVisibilityBtn, 'AssemblyAI');
     bindProviderToggle();
     bindFetchOllamaModels();

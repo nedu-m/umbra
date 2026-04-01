@@ -10,7 +10,7 @@
   let chatContext = [];
 
   function getAllKeysUnavailableMessage() {
-    return 'All configured Gemini API keys are currently unavailable (quota exhausted or invalid). Please wait and try again later.';
+    return 'All configured Claude API keys are currently unavailable (quota exhausted or invalid). Please wait and try again later.';
   }
 
   function mapGeminiErrorMessage(error, fallbackPrefix = 'Request failed') {
@@ -25,28 +25,27 @@
       return 'Cannot connect to Ollama. Make sure Ollama is running locally.';
     }
 
-    if (normalizedMessage.includes('no api key configured') || normalizedMessage.includes('no gemini api key')) {
-      return 'No Gemini API key configured. Add it in Settings.';
+    if (normalizedMessage.includes('no api key configured') || normalizedMessage.includes('no claude api key')) {
+      return 'No Claude API key configured. Add it in Settings.';
     }
 
     if (
       normalizedMessage.includes('api key not valid') ||
       normalizedMessage.includes('invalid api key') ||
       normalizedMessage.includes('api_key_invalid') ||
-      normalizedMessage.includes('permission denied') ||
-      normalizedMessage.includes('permission_denied') ||
+      normalizedMessage.includes('authentication') ||
       normalizedMessage.includes('unauthorized') ||
       normalizedMessage.includes('forbidden') ||
       normalizedMessage.includes('401') ||
       normalizedMessage.includes('403')
     ) {
-      return 'Invalid Gemini API key. Please check the key values in Settings.';
+      return 'Invalid Claude API key. Please check the key values in Settings.';
     }
 
     if (
       normalizedMessage.includes('quota') ||
-      normalizedMessage.includes('daily request limit') ||
-      normalizedMessage.includes('exceeded your current quota')
+      normalizedMessage.includes('rate limit') ||
+      normalizedMessage.includes('too many requests')
     ) {
       return 'API quota exceeded. Please try again later.';
     }
@@ -79,7 +78,7 @@
 
     if (!geminiRuntime.hasApiKeys()) {
       sendToRenderer('analysis-result', {
-        error: 'No Gemini API key configured. Add it in Settings.'
+        error: 'No Claude API key configured. Add it in Settings.'
       });
       return;
     }
@@ -190,7 +189,7 @@
       assemblyAiService.flushAllSttHistoryBuffers('pre-ask-ai');
 
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Gemini API key configured. Add it in Settings.');
+        throw new Error('No Claude API key configured. Add it in Settings.');
       }
 
       const transcriptContext = typeof payload?.transcriptContext === 'string'
@@ -314,7 +313,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-suggest');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Gemini API key configured. Add it in Settings.');
+        throw new Error('No Claude API key configured. Add it in Settings.');
       }
 
       const payload = typeof context === 'object' && context !== null
@@ -334,7 +333,7 @@
 
       const suggestions = await geminiRuntime.executeWithKeyFailover((geminiService) => {
         if (!geminiService || !geminiService.model) {
-          throw new Error('Gemini service not initialized');
+          throw new Error('AI service not initialized');
         }
 
         return geminiService.suggestResponse(contextPrompt, {
@@ -356,7 +355,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-notes');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Gemini API key configured. Add it in Settings.');
+        throw new Error('No Claude API key configured. Add it in Settings.');
       }
 
       const contextStringOverride = typeof payload?.contextString === 'string'
@@ -370,7 +369,7 @@
 
       const notes = await geminiRuntime.executeWithKeyFailover((geminiService) => {
         if (!geminiService || !geminiService.model) {
-          throw new Error('Gemini service not initialized');
+          throw new Error('AI service not initialized');
         }
 
         return geminiService.generateMeetingNotes({
@@ -392,12 +391,12 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-followup');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Gemini API key configured. Add it in Settings.');
+        throw new Error('No Claude API key configured. Add it in Settings.');
       }
 
       const email = await geminiRuntime.executeWithKeyFailover((geminiService) => {
         if (!geminiService || !geminiService.model) {
-          throw new Error('Gemini service not initialized');
+          throw new Error('AI service not initialized');
         }
 
         return geminiService.generateFollowUpEmail();
@@ -414,12 +413,12 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-answer');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Gemini API key configured. Add it in Settings.');
+        throw new Error('No Claude API key configured. Add it in Settings.');
       }
 
       const answer = await geminiRuntime.executeWithKeyFailover((geminiService) => {
         if (!geminiService || !geminiService.model) {
-          throw new Error('Gemini service not initialized');
+          throw new Error('AI service not initialized');
         }
 
         return geminiService.answerQuestion(question);
@@ -436,7 +435,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-insights');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Gemini API key configured. Add it in Settings.');
+        throw new Error('No Claude API key configured. Add it in Settings.');
       }
 
       const contextStringOverride = typeof payload?.contextString === 'string'
@@ -450,7 +449,7 @@
 
       const insights = await geminiRuntime.executeWithKeyFailover((geminiService) => {
         if (!geminiService || !geminiService.model) {
-          throw new Error('Gemini service not initialized');
+          throw new Error('AI service not initialized');
         }
 
         return geminiService.getConversationInsights({

@@ -209,30 +209,30 @@
         <div class="settings-group">
           <label class="settings-label">AI Provider</label>
           <select id="setting-ai-provider" class="settings-input">
-            <option value="gemini">Gemini</option>
+            <option value="claude">Claude (Anthropic)</option>
             <option value="ollama">Ollama (Local)</option>
           </select>
         </div>
-        <div id="gemini-settings-group">
+        <div id="claude-settings-group">
           <div class="settings-group">
-            <label class="settings-label">Gemini API Key(s)</label>
+            <label class="settings-label">Anthropic API Key(s)</label>
             <div class="settings-input-row">
-              <input type="password" id="setting-gemini-key" class="settings-input" placeholder="Enter Gemini API key(s), comma-separated..." />
+              <input type="password" id="setting-claude-key" class="settings-input" placeholder="Enter Anthropic API key(s), comma-separated..." />
               <button
                 type="button"
-                id="toggle-gemini-key-visibility"
+                id="toggle-claude-key-visibility"
                 class="settings-input-toggle"
-                aria-label="Show Gemini API key"
+                aria-label="Show Claude API key"
                 aria-pressed="false"
               >
                 Show
               </button>
             </div>
-            <div class="settings-helper-text">Multiple Gemini keys are supported as comma-separated values.</div>
+            <div class="settings-helper-text">Multiple keys are supported as comma-separated values (automatic failover).</div>
           </div>
           <div class="settings-group">
-            <label class="settings-label">Gemini Model</label>
-            <select id="setting-gemini-model" class="settings-input"></select>
+            <label class="settings-label">Claude Model</label>
+            <select id="setting-claude-model" class="settings-input"></select>
           </div>
         </div>
         <div id="ollama-settings-group" class="hidden">

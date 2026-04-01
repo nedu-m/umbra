@@ -1,18 +1,17 @@
 // AI provider configuration.
-// Supported providers: 'gemini' and 'ollama'.
-const AI_PROVIDERS = ['gemini', 'ollama'];
-const DEFAULT_AI_PROVIDER = 'gemini';
+// Supported providers: 'claude' and 'ollama'.
+const AI_PROVIDERS = ['claude', 'ollama'];
+const DEFAULT_AI_PROVIDER = 'claude';
 
 const DEFAULT_OLLAMA_BASE_URL = 'http://localhost:11434';
 const DEFAULT_OLLAMA_MODEL = 'llama3.2';
 
-// Gemini model configuration.
+// Claude model configuration.
 // The first model in this list is treated as the default model everywhere.
-const GEMINI_MODELS = [
-  'gemini-2.5-flash-lite',
-  'gemini-3-flash-preview',
-  'gemini-3.1-flash-lite-preview',
-  'gemini-3.1-pro-preview'
+const CLAUDE_MODELS = [
+  'claude-sonnet-4-6',
+  'claude-opus-4-6',
+  'claude-haiku-4-5-20251001'
 ];
 
 // AssemblyAI speech model configuration.
@@ -174,25 +173,25 @@ function getDefaultOllamaModel() {
   return DEFAULT_OLLAMA_MODEL;
 }
 
-// Gemini model configuration functions
-function getGeminiModels() {
-  if (!Array.isArray(GEMINI_MODELS) || GEMINI_MODELS.length === 0) {
-    throw new Error('Gemini models are not configured. Add at least one model to src/config.js.');
+// Claude model configuration functions
+function getClaudeModels() {
+  if (!Array.isArray(CLAUDE_MODELS) || CLAUDE_MODELS.length === 0) {
+    throw new Error('Claude models are not configured. Add at least one model to src/config.js.');
   }
 
-  return [...GEMINI_MODELS];
+  return [...CLAUDE_MODELS];
 }
 
-function getDefaultGeminiModel() {
-  return getGeminiModels()[0];
+function getDefaultClaudeModel() {
+  return getClaudeModels()[0];
 }
 
-function isConfiguredGeminiModel(modelName) {
-  return getGeminiModels().includes(modelName);
+function isConfiguredClaudeModel(modelName) {
+  return getClaudeModels().includes(modelName);
 }
 
-function resolveGeminiModel(modelName) {
-  return isConfiguredGeminiModel(modelName) ? modelName : getDefaultGeminiModel();
+function resolveClaudeModel(modelName) {
+  return isConfiguredClaudeModel(modelName) ? modelName : getDefaultClaudeModel();
 }
 
 // Programming language configuration functions
@@ -288,17 +287,17 @@ module.exports = {
   resolveAiProvider,
   getAssemblyAiSpeechModels,
   getDefaultAssemblyAiSpeechModel,
-  getGeminiModels,
-  getDefaultGeminiModel,
+  getClaudeModels,
+  getDefaultClaudeModel,
   getKeyboardShortcutAccelerator,
   getKeyboardShortcutById,
   getKeyboardShortcuts,
   getDefaultProgrammingLanguage,
   getProgrammingLanguages,
   isConfiguredAssemblyAiSpeechModel,
-  isConfiguredGeminiModel,
+  isConfiguredClaudeModel,
   isConfiguredProgrammingLanguage,
   resolveAssemblyAiSpeechModel,
-  resolveGeminiModel,
+  resolveClaudeModel,
   resolveProgrammingLanguage
 };
