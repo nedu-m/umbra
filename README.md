@@ -282,6 +282,26 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 
 **CI artifacts (every push / PR):** **Actions** → **Build** → latest green run → **Artifacts** → **umbra-macos-latest** / **umbra-windows-latest** (zip). These expire after GitHub’s artifact retention (often ~90 days).
 
+#### macOS signing and notarization (Gatekeeper)
+
+Unsigned builds show **Apple could not verify “Umbra”**. [`package.json`](./package.json) enables **hardened runtime** and **`notarize: true`**; [`.github/workflows/build.yml`](./.github/workflows/build.yml) and [`.github/workflows/release.yml`](./.github/workflows/release.yml) pass Apple credentials **only on macOS runners** when you add repository secrets.
+
+1. Join the [Apple Developer Program](https://developer.apple.com/programs/) (paid).
+2. In [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources/certificates/list), create **Developer ID Application** (not Mac App Store). Install it in Keychain Access, then export **both** the cert and private key as **.p12** with a password.
+3. Add **Actions** secrets (repo **Settings → Secrets and variables → Actions**):
+
+| Secret | Value |
+|--------|--------|
+| `MAC_CERT_P12_BASE64` | Base64 of the `.p12` file (e.g. `base64 -i cert.p12 \| pbcopy` on macOS; GNU `base64 -w0 cert.p12` on Linux) |
+| `MAC_CERT_PASSWORD` | Password you set when exporting the `.p12` |
+| `APPLE_ID` | Your Apple ID email |
+| `APPLE_APP_SPECIFIC_PASSWORD` | From [appleid.apple.com](https://appleid.apple.com) → Sign-In and Security → **App-Specific Passwords** |
+| `APPLE_TEAM_ID` | 10-character Team ID (developer account **Membership details**) |
+
+4. Re-run **Build** or **Release**. Notarization often adds **5–15 minutes** on top of the universal build.
+
+If those secrets are missing, the DMG is still built **unsigned** (you can open it once with **Right-click → Open**, which is not suitable for normal distribution).
+
 ### GitHub Releases (installers on the Releases page)
 
 [`.github/workflows/release.yml`](./.github/workflows/release.yml) runs on **`release: created`** (e.g. when you save a **draft** release) and again on **`release: published`**. Each time it builds on Windows and macOS and **uploads** `Umbra.exe` and the `.dmg` file(s) to that release, so you can download binaries from a **draft** before clicking Publish. Publishing triggers a second run (same assets re-uploaded; harmless).
