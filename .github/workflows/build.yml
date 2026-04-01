@@ -1,0 +1,80 @@
+# Matrix builds: Windows portable (.exe) + macOS DMG.
+# Artifacts: Actions tab → latest run → umbra-windows-latest / umbra-macos-latest
+
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            build_cmd: npm run build:win
+          - os: macos-latest
+            build_cmd: npm run build:mac
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # electron-builder extraResources copies .env; repo only ships .env.example
+      - name: Prepare .env for packaging
+        shell: bash
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env 2>/dev/null || touch .env
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      # package.json references assets/chrome.icns; only chrome.ico is in repo
+      - name: Generate macOS chrome.icns from chrome.ico
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          if [ -f assets/chrome.icns ]; then
+            exit 0
+          fi
+          set -e
+          SRC=assets/chrome.ico
+          OUT=/tmp/Umbra.iconset
+          mkdir -p "$OUT"
+          sips -z 16 16     "$SRC" --out "$OUT/icon_16x16.png"
+          sips -z 32 32     "$SRC" --out "$OUT/icon_16x16@2x.png"
+          sips -z 32 32     "$SRC" --out "$OUT/icon_32x32.png"
+          sips -z 64 64     "$SRC" --out "$OUT/icon_32x32@2x.png"
+          sips -z 128 128   "$SRC" --out "$OUT/icon_128x128.png"
+          sips -z 256 256   "$SRC" --out "$OUT/icon_128x128@2x.png"
+          sips -z 256 256   "$SRC" --out "$OUT/icon_256x256.png"
+          sips -z 512 512   "$SRC" --out "$OUT/icon_256x256@2x.png"
+          sips -z 512 512   "$SRC" --out "$OUT/icon_512x512.png"
+          sips -z 1024 1024 "$SRC" --out "$OUT/icon_512x512@2x.png"
+          iconutil -c icns "$OUT" -o assets/chrome.icns
+
+      - name: Build
+        run: ${{ matrix.build_cmd }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: umbra-${{ matrix.os }}
+          path: dist/
+          if-no-files-found: error

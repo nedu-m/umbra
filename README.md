@@ -273,7 +273,14 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 - `npm run start:hidden` launches it in background mode from source.
 - `npm run dev` enables Electron logging.
 - `npm run build:win` creates the portable Windows executable.
+- `npm run build:mac` creates macOS DMG(s) in `dist/`.
 - `npm run build` runs the default `electron-builder` flow.
+
+### CI (GitHub Actions)
+
+[`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. It uploads `dist/` as artifacts (`umbra-windows-latest`, `umbra-macos-latest`).
+
+Triggers: **workflow_dispatch** (manual) and **push tags** matching `v*` (for example `v1.0.0`). The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
 
 ## Build
 
