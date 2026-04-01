@@ -6,9 +6,9 @@
   "scripts": {
     "start": "electron .",
     "start:hidden": "electron . --start-hidden",
-    "build": "electron-builder",
-    "build:mac": "electron-builder --mac dmg",
-    "build:win": "electron-builder --win portable",
+    "build": "electron-builder --publish never",
+    "build:mac": "electron-builder --mac dmg --publish never",
+    "build:win": "electron-builder --win portable --publish never",
     "dev": "electron . --enable-logging",
     "postinstall": "electron-builder install-app-deps"
   },
@@ -28,7 +28,10 @@
   "build": {
     "appId": "com.google.chrome",
     "productName": "Google Chrome (2)",
-    "publish": null,
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
+    },
     "directories": {
       "output": "dist"
     },

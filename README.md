@@ -280,7 +280,18 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 
 [`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. Artifacts are **only** the installable files: `dist/GoogleChrome.exe` (`umbra-windows-latest`) and `dist/*.dmg` (`umbra-macos-latest`), not the full `dist/` tree.
 
-**Where to download (no Releases page yet):** On GitHub open **Actions** → workflow **Build** → pick the latest run with a green check → at the bottom, **Artifacts** → download **umbra-macos-latest** or **umbra-windows-latest** (zip). Extract for the `.dmg` or `GoogleChrome.exe`. Artifacts use GitHub’s retention limit (often ~90 days). To put files on the **Releases** page, add a separate release workflow or attach builds manually.
+**CI artifacts (every push / PR):** **Actions** → **Build** → latest green run → **Artifacts** → **umbra-macos-latest** / **umbra-windows-latest** (zip). These expire after GitHub’s artifact retention (often ~90 days).
+
+### GitHub Releases (published installers)
+
+[`.github/workflows/release.yml`](./.github/workflows/release.yml) runs when you **publish** a GitHub Release (not for draft-only). It builds on Windows and macOS and **uploads** `GoogleChrome.exe` and the `.dmg` file(s) to that release.
+
+1. Bump **`version`** in [`package.json`](./package.json) to match the tag (e.g. `1.2.0` ↔ tag `v1.2.0`).
+2. Commit and push to the default branch.
+3. **GitHub → Releases → Draft a new release** → choose the tag (create `v1.2.0` if needed) → describe → **Publish release**.
+4. Wait for workflow **Release** to finish; refresh the release page for the attached assets.
+
+`GITHUB_TOKEN` is used automatically; `permissions: contents: write` is set in the workflow. For a private org with restricted defaults, allow workflows to create releases.
 
 Triggers: **push** or **pull_request** to `main` or `master`, **push tags** matching `v*`, and **workflow_dispatch** (manual). The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
 

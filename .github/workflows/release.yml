@@ -1,58 +1,52 @@
-# Matrix builds: Windows portable (.exe) + macOS DMG.
-# Artifacts: umbra-windows-latest (GoogleChrome.exe), umbra-macos-latest (*.dmg only —
-# not the whole dist/ tree, so downloads stay small).
-#
-# Windows: node-window-manager pulls in extract-file-icon (node-gyp). First npm ci
-# can take several minutes compiling native code. Do not cancel early; "Terminate
-# batch job" in logs usually means the run was stopped manually or by a short timeout.
+# Builds installers and uploads them to the GitHub Release that was just published.
+# Prereq: package.json "version" must match the release tag (e.g. tag v1.2.3 → version 1.2.3).
 
-name: Build
+name: Release
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - master
-  pull_request:
-    branches:
-      - main
-      - master
+  release:
+    types: [published]
+
+permissions:
+  contents: write
 
 concurrency:
-  group: build-${{ github.workflow }}-${{ github.ref }}
+  group: release-${{ github.event.release.tag_name }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  publish:
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            build_cmd: npm run build:win
+            cmd: npx electron-builder --win portable --publish always
           - os: macos-latest
-            build_cmd: npm run build:mac
+            cmd: npx electron-builder --mac dmg --publish always
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
 
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
 
-      # So node-gyp can find MSVC (extract-file-icon, node-window-manager, postinstall rebuilds).
       - name: Use MSVC (Windows)
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
 
-      # electron-builder extraResources copies .env; repo only ships .env.example
       - name: Prepare .env for packaging
         shell: bash
         run: |
@@ -60,12 +54,9 @@ jobs:
             cp .env.example .env 2>/dev/null || touch .env
           fi
 
-      # --foreground-scripts: avoid parallel lifecycle scripts (fewer Windows EPERM cleanups).
       - name: Install dependencies
         run: npm ci --foreground-scripts --no-audit
 
-      # package.json references assets/chrome.icns; only chrome.ico is in repo.
-      # sips is unreliable when reading .ico repeatedly; decode once to PNG then resize.
       - name: Generate macOS chrome.icns from chrome.ico
         if: runner.os == 'macOS'
         shell: bash
@@ -93,22 +84,5 @@ jobs:
           sips -z 1024 1024 "$BASE" --out "$OUT/icon_512x512@2x.png"
           iconutil -c icns "$OUT" -o assets/chrome.icns
 
-      - name: Build
-        run: ${{ matrix.build_cmd }}
-
-      # Upload installable outputs only. Full dist/ includes unpacked .app (duplicates DMG) and bloats the zip.
-      - name: Upload macOS DMG
-        if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: umbra-macos-latest
-          path: dist/*.dmg
-          if-no-files-found: error
-
-      - name: Upload Windows portable
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: umbra-windows-latest
-          path: dist/GoogleChrome.exe
-          if-no-files-found: error
+      - name: Build and publish to GitHub Release
+        run: ${{ matrix.cmd }}
