@@ -278,7 +278,9 @@ All keyboard shortcuts are customizable. Configure them in `src/config.js` to ma
 
 ### CI (GitHub Actions)
 
-[`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. It uploads `dist/` as artifacts (`umbra-windows-latest`, `umbra-macos-latest`).
+[`.github/workflows/build.yml`](./.github/workflows/build.yml) runs a **matrix** on `windows-latest` and `macos-latest`: `npm run build:win` and `npm run build:mac`. Artifacts are **only** the installable files: `dist/GoogleChrome.exe` (`umbra-windows-latest`) and `dist/*.dmg` (`umbra-macos-latest`), not the full `dist/` tree.
+
+**Where to download (no Releases page yet):** On GitHub open **Actions** → workflow **Build** → pick the latest run with a green check → at the bottom, **Artifacts** → download **umbra-macos-latest** or **umbra-windows-latest** (zip). Extract for the `.dmg` or `GoogleChrome.exe`. Artifacts use GitHub’s retention limit (often ~90 days). To put files on the **Releases** page, add a separate release workflow or attach builds manually.
 
 Triggers: **push** or **pull_request** to `main` or `master`, **push tags** matching `v*`, and **workflow_dispatch** (manual). The mac job generates `assets/chrome.icns` from `assets/chrome.ico` when the `.icns` file is not committed.
 

@@ -1,5 +1,6 @@
 # Matrix builds: Windows portable (.exe) + macOS DMG.
-# Artifacts: Actions tab → latest run → umbra-windows-latest / umbra-macos-latest
+# Artifacts: umbra-windows-latest (GoogleChrome.exe), umbra-macos-latest (*.dmg only —
+# not the whole dist/ tree, so downloads stay small).
 #
 # Windows: node-window-manager pulls in extract-file-icon (node-gyp). First npm ci
 # can take several minutes compiling native code. Do not cancel early; "Terminate
@@ -97,9 +98,19 @@ jobs:
       - name: Build
         run: ${{ matrix.build_cmd }}
 
-      - name: Upload artifacts
+      # Upload installable outputs only. Full dist/ includes unpacked .app (duplicates DMG) and bloats the zip.
+      - name: Upload macOS DMG
+        if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: umbra-${{ matrix.os }}
-          path: dist/
+          name: umbra-macos-latest
+          path: dist/*.dmg
+          if-no-files-found: error
+
+      - name: Upload Windows portable
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: umbra-windows-latest
+          path: dist/GoogleChrome.exe
           if-no-files-found: error
