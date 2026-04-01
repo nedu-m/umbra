@@ -141,15 +141,19 @@ const closeSettingsBtn = document.getElementById('close-settings');
 const saveSettingsBtn = document.getElementById('save-settings-btn');
 const settingAiProvider = document.getElementById('setting-ai-provider');
 const claudeSettingsGroup = document.getElementById('claude-settings-group');
+const openaiSettingsGroup = document.getElementById('openai-settings-group');
 const ollamaSettingsGroup = document.getElementById('ollama-settings-group');
 const settingClaudeKey = document.getElementById('setting-claude-key');
 const toggleClaudeKeyVisibilityBtn = document.getElementById('toggle-claude-key-visibility');
 const settingClaudeModel = document.getElementById('setting-claude-model');
+const settingOpenaiKey = document.getElementById('setting-openai-key');
+const toggleOpenaiKeyVisibilityBtn = document.getElementById('toggle-openai-key-visibility');
+const settingOpenaiModel = document.getElementById('setting-openai-model');
 const settingOllamaBaseUrl = document.getElementById('setting-ollama-base-url');
 const settingOllamaModel = document.getElementById('setting-ollama-model');
 const settingOllamaModelSelect = document.getElementById('setting-ollama-model-select');
 const fetchOllamaModelsBtn = document.getElementById('fetch-ollama-models');
-const settingProgrammingLanguage = document.getElementById('setting-programming-language');
+const settingProgrammingLanguage = document.getElementById('setting-programming-languages');
 const settingAssemblyKey = document.getElementById('setting-assembly-key');
 const toggleAssemblyKeyVisibilityBtn = document.getElementById('toggle-assembly-key-visibility');
 const settingAssemblyModel = document.getElementById('setting-assembly-model');
@@ -210,10 +214,14 @@ const settingsPanelManager = createSettingsPanelManager({
     settingsPanel,
     settingAiProvider,
     claudeSettingsGroup,
+    openaiSettingsGroup,
     ollamaSettingsGroup,
     settingClaudeKey,
     toggleClaudeKeyVisibilityBtn,
     settingClaudeModel,
+    settingOpenaiKey,
+    toggleOpenaiKeyVisibilityBtn,
+    settingOpenaiModel,
     settingProgrammingLanguage,
     settingOllamaBaseUrl,
     settingOllamaModel,
@@ -479,6 +487,10 @@ function hasConfiguredClaudeApiKeys(value) {
     return keys.length > 0;
 }
 
+function hasConfiguredOpenAiApiKeys(value) {
+    return hasConfiguredClaudeApiKeys(value);
+}
+
 function hasConfiguredAssemblyAiApiKey(value) {
     return String(value ?? '').trim().length > 0;
 }
@@ -493,6 +505,12 @@ function applyApiKeyAvailabilityFromSettings(settings) {
     // Ollama doesn't require API keys, so treat it as always configured
     if (settings.aiProvider === 'ollama') {
         hasClaudeApiKeysConfigured = true;
+    } else if (settings.aiProvider === 'openai') {
+        if (typeof settings.hasOpenAiApiKeys === 'boolean') {
+            hasClaudeApiKeysConfigured = settings.hasOpenAiApiKeys;
+        } else {
+            hasClaudeApiKeysConfigured = hasConfiguredOpenAiApiKeys(settings.openaiApiKey);
+        }
     } else if (typeof settings.hasClaudeApiKeys === 'boolean') {
         hasClaudeApiKeysConfigured = settings.hasClaudeApiKeys;
     } else {
@@ -843,7 +861,7 @@ function scheduleAutoAnswerFromTranscript(source) {
 
 async function askAiWithSessionContext(options = {}) {
     if (!hasClaudeApiKeysConfigured) {
-        showFeedback('Claude API key missing. Add it in Settings.', 'error');
+        showFeedback('AI API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -901,7 +919,7 @@ async function askAiWithSessionContext(options = {}) {
 
 async function analyzeScreenshotsOnly() {
     if (!hasClaudeApiKeysConfigured) {
-        showFeedback('Claude API key missing. Add it in Settings.', 'error');
+        showFeedback('AI API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -1039,7 +1057,7 @@ async function toggleWindowFullscreen() {
 
 async function getResponseSuggestions() {
     if (!hasClaudeApiKeysConfigured) {
-        showFeedback('Claude API key missing. Add it in Settings.', 'error');
+        showFeedback('AI API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -1084,7 +1102,7 @@ async function getResponseSuggestions() {
 
 async function generateMeetingNotes() {
     if (!hasClaudeApiKeysConfigured) {
-        showFeedback('Claude API key missing. Add it in Settings.', 'error');
+        showFeedback('AI API key missing. Add it in Settings.', 'error');
         return;
     }
 
@@ -1129,7 +1147,7 @@ async function generateMeetingNotes() {
 
 async function getConversationInsights() {
     if (!hasClaudeApiKeysConfigured) {
-        showFeedback('Claude API key missing. Add it in Settings.', 'error');
+        showFeedback('AI API key missing. Add it in Settings.', 'error');
         return;
     }
 

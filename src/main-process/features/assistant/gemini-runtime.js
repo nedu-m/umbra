@@ -7,7 +7,8 @@ const {
   getDefaultOllamaBaseUrl,
   getDefaultOllamaModel,
   resolveGeminiModel,
-  resolveProgrammingLanguage,
+  normalizeProgrammingLanguages,
+  serializeProgrammingLanguages,
   getGeminiModels,
   getDefaultGeminiModel,
   getProgrammingLanguages,
@@ -41,7 +42,7 @@ function createGeminiRuntime() {
   let ollamaService = null;
   let activeAiProvider = getDefaultAiProvider();
   let activeGeminiModel = getDefaultGeminiModel();
-  let activeProgrammingLanguage = getDefaultProgrammingLanguage();
+  let activeProgrammingLanguage = serializeProgrammingLanguages(getDefaultProgrammingLanguage());
   let activeOllamaBaseUrl = getDefaultOllamaBaseUrl();
   let activeOllamaModel = getDefaultOllamaModel();
   let geminiApiKeys = [];
@@ -103,7 +104,7 @@ function createGeminiRuntime() {
     programmingLanguage = activeProgrammingLanguage
   ) {
     activeGeminiModel = resolveGeminiModel(modelName);
-    activeProgrammingLanguage = resolveProgrammingLanguage(programmingLanguage);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(programmingLanguage));
 
     try {
       if (!apiKey) {
@@ -331,7 +332,7 @@ function createGeminiRuntime() {
   ) {
     activeOllamaBaseUrl = String(baseUrl || getDefaultOllamaBaseUrl()).replace(/\/+$/, '');
     activeOllamaModel = String(modelName || getDefaultOllamaModel()).trim();
-    activeProgrammingLanguage = resolveProgrammingLanguage(programmingLanguage);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(programmingLanguage));
 
     try {
       console.log(
@@ -418,7 +419,7 @@ function createGeminiRuntime() {
   }
 
   function setActiveProgrammingLanguage(language) {
-    activeProgrammingLanguage = resolveProgrammingLanguage(language);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(language));
     return activeProgrammingLanguage;
   }
 

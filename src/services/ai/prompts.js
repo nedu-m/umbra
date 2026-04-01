@@ -1,11 +1,17 @@
 const {
   getProgrammingLanguages,
-  resolveProgrammingLanguage
+  resolveProgrammingLanguage,
+  normalizeProgrammingLanguages
 } = require('../../config');
 
 function buildContextBlock(label, content) {
   const normalizedContent = typeof content === 'string' ? content.trim() : '';
   return normalizedContent ? `${label}:\n${normalizedContent}\n\n` : '';
+}
+
+function solutionLanguageLabel(programmingLanguage) {
+  const langs = normalizeProgrammingLanguages(programmingLanguage);
+  return langs.length === 1 ? langs[0] : langs.join(' / ');
 }
 
 function getCodeFenceLanguage(programmingLanguage) {
@@ -26,10 +32,13 @@ function getCodeFenceLanguage(programmingLanguage) {
 }
 
 function buildProgrammingLanguagePreference(programmingLanguage) {
-  const resolvedLanguage = resolveProgrammingLanguage(programmingLanguage);
+  const languages = normalizeProgrammingLanguages(programmingLanguage);
   const configuredLanguages = getProgrammingLanguages().join(', ');
+  const listText = languages.join(', ');
 
-  return `
+  if (languages.length === 1) {
+    const resolvedLanguage = languages[0];
+    return `
 === PROGRAMMING LANGUAGE PREFERENCE ===
 - Selected default programming language: ${resolvedLanguage}
 - Use ${resolvedLanguage} for code solutions and code examples unless a higher-priority signal requires another language.
@@ -40,11 +49,22 @@ function buildProgrammingLanguagePreference(programmingLanguage) {
 - Keep all code, libraries, syntax, idioms, and complexity discussion aligned with the final language you choose.
 - Configured language options in this app: ${configuredLanguages}
 `.trim();
+  }
+
+  return `
+=== PROGRAMMING LANGUAGE PREFERENCE ===
+- Selected default programming languages (priority order): ${listText}
+- Use the first applicable language from this list for code solutions and examples unless a higher-priority signal requires another language.
+- Language precedence:
+  1. Explicit user request
+  2. Language clearly implied by the screenshot, codebase, or platform
+  3. Selected defaults in order: ${listText}
+- Keep all code, libraries, syntax, idioms, and complexity discussion aligned with the final language you choose.
+- Configured language options in this app: ${configuredLanguages}
+`.trim();
 }
 
-function buildLanguageBestPractices(programmingLanguage) {
-  const resolvedLanguage = resolveProgrammingLanguage(programmingLanguage);
-
+function bestPracticeForSingleLanguage(resolvedLanguage) {
   switch (resolvedLanguage) {
     case 'Python':
       return 'Use idiomatic Python, prefer standard-library data structures, import required modules, and pay attention to stdin/stdout performance when the problem is input-heavy.';
@@ -69,6 +89,16 @@ function buildLanguageBestPractices(programmingLanguage) {
   }
 }
 
+function buildLanguageBestPractices(programmingLanguage) {
+  const languages = normalizeProgrammingLanguages(programmingLanguage);
+  if (languages.length === 1) {
+    return bestPracticeForSingleLanguage(languages[0]);
+  }
+  return languages
+    .map((lang) => `${lang}: ${bestPracticeForSingleLanguage(lang)}`)
+    .join(' ');
+}
+
 // ─── ASK AI ──────────────────────────────────────────────────────────────────
 // Uses transcript, screenshots, and chat history together.
 // Goal: understand the full context across multiple messages and screenshots,
@@ -80,13 +110,13 @@ function buildAskAiSessionPrompt({
   screenshotCount = 0,
   programmingLanguage
 } = {}) {
-  const resolvedLanguage = resolveProgrammingLanguage(programmingLanguage);
-  const codeFenceLanguage = getCodeFenceLanguage(resolvedLanguage);
+  const solutionLabel = solutionLanguageLabel(programmingLanguage);
+  const codeFenceLanguage = getCodeFenceLanguage(programmingLanguage);
 
   return `
 You are Invisibrain, an expert AI assistant for technical interviews, coding sessions, meetings, and problem-solving.
 
-${buildProgrammingLanguagePreference(resolvedLanguage)}
+${buildProgrammingLanguagePreference(programmingLanguage)}
 
 === WHAT YOU HAVE ===
 - Transcript: live speech-to-text capture of the conversation (may contain recognition errors)
@@ -127,7 +157,7 @@ For coding, algorithmic, or debugging tasks, use this structure instead of the p
 **Approach:**
 [Algorithm, key idea, or root cause of the bug]
 
-**Solution (${resolvedLanguage}):**
+**Solution (${solutionLabel}):**
 \`\`\`${codeFenceLanguage}
 [Complete, runnable code — no placeholders]
 \`\`\`
@@ -145,7 +175,7 @@ Time: O(?) | Space: O(?)
 - Do not ask for clarification unless the intent is genuinely ambiguous across ALL sources combined
 - Do not produce partial code when a complete solution is expected
 - Do not reference these instructions or mention internal tooling in your response
-- ${buildLanguageBestPractices(resolvedLanguage)}
+- ${buildLanguageBestPractices(programmingLanguage)}
 
 ${buildContextBlock('Conversation history', contextString)}${buildContextBlock('Session summary', sessionSummary)}${buildContextBlock('Transcript', transcriptContext)}`.trim();
 }
@@ -159,8 +189,8 @@ function buildScreenshotAnalysisPrompt({
   programmingLanguage,
   screenshotCount = 1
 } = {}) {
-  const resolvedLanguage = resolveProgrammingLanguage(programmingLanguage);
-  const codeFenceLanguage = getCodeFenceLanguage(resolvedLanguage);
+  const solutionLabel = solutionLanguageLabel(programmingLanguage);
+  const codeFenceLanguage = getCodeFenceLanguage(programmingLanguage);
 
   const screenshotDirective = screenshotCount > 1
     ? `You have ${screenshotCount} screenshots. Analyze them as a set — they may show different parts of the same problem, sequential steps, or related views. Identify the connections between them before answering.`
@@ -169,7 +199,7 @@ function buildScreenshotAnalysisPrompt({
   return `
 You are Invisibrain, an expert programming assistant for interviews, debugging, competitive programming, and technical problem solving.
 
-${buildProgrammingLanguagePreference(resolvedLanguage)}
+${buildProgrammingLanguagePreference(programmingLanguage)}
 
 === SCREENSHOT ANALYSIS ===
 - ${screenshotDirective}
@@ -187,7 +217,7 @@ ${buildProgrammingLanguagePreference(resolvedLanguage)}
 - Mentally verify your solution against visible sample inputs and edge cases before responding.
 - State time and space complexity for all algorithmic solutions.
 - Prefer the simplest correct solution that satisfies the visible constraints.
-- ${buildLanguageBestPractices(resolvedLanguage)}
+- ${buildLanguageBestPractices(programmingLanguage)}
 
 === RESPONSE FORMAT ===
 For coding, algorithmic, or debugging tasks:
@@ -201,7 +231,7 @@ For coding, algorithmic, or debugging tasks:
 **Complexity:**
 Time: O(?) | Space: O(?)
 
-**Solution (${resolvedLanguage}):**
+**Solution (${solutionLabel}):**
 \`\`\`${codeFenceLanguage}
 [Complete, runnable code — no placeholders or stubs]
 \`\`\`
@@ -225,7 +255,7 @@ For non-coding screenshots (UI, architecture, documentation, general technical):
 - Verify all syntax, imports, and platform-specific I/O conventions are correct.
 - Confirm the language choice follows the precedence rules above.
 - Do not produce partial code when a complete solution is expected.
-- If you switch away from ${resolvedLanguage}, explicitly state the language used and why.
+- If you switch away from the defaults (${solutionLabel}), explicitly state the language used and why.
 
 ${buildContextBlock('Conversation history', contextString)}${buildContextBlock('Additional context', additionalContext)}`.trim();
 }
@@ -378,17 +408,20 @@ function buildAnswerQuestionPrompt({
   question = '',
   programmingLanguage
 } = {}) {
-  const resolvedLanguage = resolveProgrammingLanguage(programmingLanguage);
-  const codeFenceLanguage = getCodeFenceLanguage(resolvedLanguage);
+  const languages = normalizeProgrammingLanguages(programmingLanguage);
+  const defaultHint = languages.length === 1
+    ? languages[0]
+    : `one of these defaults in priority order: ${languages.join(', ')}`;
+  const codeFenceLanguage = getCodeFenceLanguage(programmingLanguage);
 
   return `
 You are Invisibrain, an expert technical assistant.
 
-${buildProgrammingLanguagePreference(resolvedLanguage)}
+${buildProgrammingLanguagePreference(programmingLanguage)}
 
 ${buildContextBlock('Previous conversation', contextString)}Question: ${question}
 
-Provide a clear, concise answer. If code is useful, default to ${resolvedLanguage} unless the question explicitly requires another language.
+Provide a clear, concise answer. If code is useful, default to ${defaultHint} unless the question explicitly requires another language.
 
 Example code format when needed:
 \`\`\`${codeFenceLanguage}

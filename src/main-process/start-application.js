@@ -127,6 +127,9 @@ async function startApplication() {
     if (!appState.assemblyAiApiKey && appEnvironment?.assemblyAiApiKey) {
       fallbackState.assemblyAiApiKey = appEnvironment.assemblyAiApiKey;
     }
+    if (!appState.openaiApiKey && appEnvironment?.openaiApiKey) {
+      fallbackState.openaiApiKey = appEnvironment.openaiApiKey;
+    }
     if (Object.keys(fallbackState).length > 0) {
       appState = saveAppState(app, fallbackState);
     }
@@ -136,7 +139,12 @@ async function startApplication() {
       normalizeClaudeApiKeys(appState?.claudeApiKey),
       appState.claudeApiKeyIndex
     );
+    const openaiKeyState = geminiRuntime.setOpenaiKeys(
+      normalizeClaudeApiKeys(appState?.openaiApiKey),
+      appState.openaiApiKeyIndex
+    );
     const activeClaudeModel = geminiRuntime.setActiveClaudeModel(appState.claudeModel);
+    const activeOpenAiModel = geminiRuntime.setActiveOpenAiModel(appState.openaiModel);
     const activeOllamaBaseUrl = geminiRuntime.setActiveOllamaBaseUrl(appState.ollamaBaseUrl);
     const activeOllamaModel = geminiRuntime.setActiveOllamaModel(appState.ollamaModel);
     activeAssemblyAiSpeechModel = resolveAssemblyAiSpeechModel(appState.assemblyAiSpeechModel);
@@ -146,7 +154,9 @@ async function startApplication() {
     if (
       appState.aiProvider !== activeAiProvider ||
       appState.claudeApiKeyIndex !== keyState.activeApiKeyIndex ||
+      appState.openaiApiKeyIndex !== openaiKeyState.activeOpenaiApiKeyIndex ||
       appState.claudeModel !== activeClaudeModel ||
+      appState.openaiModel !== activeOpenAiModel ||
       appState.ollamaBaseUrl !== activeOllamaBaseUrl ||
       appState.ollamaModel !== activeOllamaModel ||
       appState.assemblyAiSpeechModel !== activeAssemblyAiSpeechModel ||
@@ -156,7 +166,9 @@ async function startApplication() {
       appState = saveAppState(app, {
         aiProvider: activeAiProvider,
         claudeApiKeyIndex: keyState.activeApiKeyIndex,
+        openaiApiKeyIndex: openaiKeyState.activeOpenaiApiKeyIndex,
         claudeModel: activeClaudeModel,
+        openaiModel: activeOpenAiModel,
         ollamaBaseUrl: activeOllamaBaseUrl,
         ollamaModel: activeOllamaModel,
         assemblyAiSpeechModel: activeAssemblyAiSpeechModel,
@@ -168,7 +180,9 @@ async function startApplication() {
     console.log('Loaded app state from:', getAppStatePath(app));
     console.log('Restored AI provider from app state:', activeAiProvider);
     console.log(`Restored Claude API key index from app state: ${keyState.activeApiKeyIndex + 1}/${keyState.claudeApiKeys.length}`);
+    console.log(`Restored OpenAI API key index from app state: ${openaiKeyState.activeOpenaiApiKeyIndex + 1}/${openaiKeyState.openaiApiKeys.length}`);
     console.log('Restored Claude model from app state:', activeClaudeModel);
+    console.log('Restored OpenAI model from app state:', activeOpenAiModel);
     console.log('Restored Ollama config from app state:', activeOllamaModel, 'at', activeOllamaBaseUrl);
     console.log('Restored AssemblyAI speech model from app state:', activeAssemblyAiSpeechModel);
     console.log('Restored programming language from app state:', activeProgrammingLanguage);
@@ -255,6 +269,8 @@ async function startApplication() {
       appState,
       claudeModels: geminiRuntime.getClaudeModels(),
       defaultClaudeModel: geminiRuntime.getDefaultClaudeModel(),
+      openaiModels: geminiRuntime.getOpenAiModels(),
+      defaultOpenAiModel: geminiRuntime.getDefaultOpenAiModel(),
       assemblyAiSpeechModels,
       defaultAssemblyAiSpeechModel,
       programmingLanguages: geminiRuntime.getProgrammingLanguages(),
@@ -270,12 +286,23 @@ async function startApplication() {
       console.log(`Persisted Claude API key index: ${nextIndex + 1}/${geminiRuntime.getApiKeys().length}`);
     });
 
+    geminiRuntime.setActiveOpenaiKeyIndexChangeHandler((nextIndex) => {
+      if (!appState || appState.openaiApiKeyIndex === nextIndex) {
+        return;
+      }
+
+      appState = saveAppState(app, { openaiApiKeyIndex: nextIndex });
+      console.log(`Persisted OpenAI API key index: ${nextIndex + 1}/${geminiRuntime.getOpenaiApiKeys().length}`);
+    });
+
     if (geminiRuntime.getActiveAiProvider() === 'ollama') {
       geminiRuntime.initializeOllamaService(
         geminiRuntime.getActiveOllamaBaseUrl(),
         geminiRuntime.getActiveOllamaModel(),
         geminiRuntime.getActiveProgrammingLanguage()
       );
+    } else if (geminiRuntime.getActiveAiProvider() === 'openai') {
+      geminiRuntime.initializeOpenAiService();
     } else {
       geminiRuntime.initializeClaudeService(
         geminiRuntime.getActiveApiKey(),

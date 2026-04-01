@@ -1,4 +1,4 @@
-﻿function registerAssistantIpc({
+function registerAssistantIpc({
   ipcMain,
   screenshotManager,
   windowController,
@@ -10,7 +10,7 @@
   let chatContext = [];
 
   function getAllKeysUnavailableMessage() {
-    return 'All configured Claude API keys are currently unavailable (quota exhausted or invalid). Please wait and try again later.';
+    return 'All configured API keys for this provider are currently unavailable (quota exhausted or invalid). Please wait and try again later.';
   }
 
   function mapGeminiErrorMessage(error, fallbackPrefix = 'Request failed') {
@@ -25,8 +25,12 @@
       return 'Cannot connect to Ollama. Make sure Ollama is running locally.';
     }
 
-    if (normalizedMessage.includes('no api key configured') || normalizedMessage.includes('no claude api key')) {
-      return 'No Claude API key configured. Add it in Settings.';
+    if (
+      normalizedMessage.includes('no api key configured') ||
+      normalizedMessage.includes('no claude api key') ||
+      normalizedMessage.includes('no openai api key')
+    ) {
+      return 'No AI API key configured. Add it in Settings.';
     }
 
     if (
@@ -39,7 +43,7 @@
       normalizedMessage.includes('401') ||
       normalizedMessage.includes('403')
     ) {
-      return 'Invalid Claude API key. Please check the key values in Settings.';
+      return 'Invalid API key. Please check the key values in Settings.';
     }
 
     if (
@@ -78,7 +82,7 @@
 
     if (!geminiRuntime.hasApiKeys()) {
       sendToRenderer('analysis-result', {
-        error: 'No Claude API key configured. Add it in Settings.'
+        error: 'No AI API key configured. Add it in Settings.'
       });
       return;
     }
@@ -201,7 +205,7 @@
       assemblyAiService.flushAllSttHistoryBuffers('pre-ask-ai');
 
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Claude API key configured. Add it in Settings.');
+        throw new Error('No AI API key configured. Add it in Settings.');
       }
 
       const transcriptContext = typeof payload?.transcriptContext === 'string'
@@ -325,7 +329,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-suggest');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Claude API key configured. Add it in Settings.');
+        throw new Error('No AI API key configured. Add it in Settings.');
       }
 
       const payload = typeof context === 'object' && context !== null
@@ -367,7 +371,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-notes');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Claude API key configured. Add it in Settings.');
+        throw new Error('No AI API key configured. Add it in Settings.');
       }
 
       const contextStringOverride = typeof payload?.contextString === 'string'
@@ -403,7 +407,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-followup');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Claude API key configured. Add it in Settings.');
+        throw new Error('No AI API key configured. Add it in Settings.');
       }
 
       const email = await geminiRuntime.executeWithKeyFailover((geminiService) => {
@@ -425,7 +429,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-answer');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Claude API key configured. Add it in Settings.');
+        throw new Error('No AI API key configured. Add it in Settings.');
       }
 
       const answer = await geminiRuntime.executeWithKeyFailover((geminiService) => {
@@ -447,7 +451,7 @@
     try {
       assemblyAiService.flushAllSttHistoryBuffers('pre-insights');
       if (!geminiRuntime.hasApiKeys()) {
-        throw new Error('No Claude API key configured. Add it in Settings.');
+        throw new Error('No AI API key configured. Add it in Settings.');
       }
 
       const contextStringOverride = typeof payload?.contextString === 'string'

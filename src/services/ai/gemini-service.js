@@ -9,7 +9,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const {
   getDefaultGeminiModel,
   resolveGeminiModel,
-  resolveProgrammingLanguage
+  normalizeProgrammingLanguages,
+  serializeProgrammingLanguages
 } = require('../../config');
 const {
   buildAnswerQuestionPrompt,
@@ -25,7 +26,9 @@ class GeminiService {
   constructor(apiKey, options = {}) {
     this.apiKey = String(apiKey || '').trim();
     this.modelName = resolveGeminiModel(options.modelName);
-    this.programmingLanguage = resolveProgrammingLanguage(options.programmingLanguage);
+    this.programmingLanguage = serializeProgrammingLanguages(
+      normalizeProgrammingLanguages(options.programmingLanguage)
+    );
     this.genAI = new GoogleGenerativeAI(this.apiKey);
 
     this.requestQueue = [];
@@ -64,8 +67,8 @@ class GeminiService {
     const previousProgrammingLanguage = this.programmingLanguage;
     const nextApiKey = String(options.apiKey ?? this.apiKey ?? '').trim();
     const nextModelName = resolveGeminiModel(options.modelName ?? this.modelName);
-    const nextProgrammingLanguage = resolveProgrammingLanguage(
-      options.programmingLanguage ?? this.programmingLanguage
+    const nextProgrammingLanguage = serializeProgrammingLanguages(
+      normalizeProgrammingLanguages(options.programmingLanguage ?? this.programmingLanguage)
     );
 
     const apiKeyChanged = nextApiKey !== this.apiKey;

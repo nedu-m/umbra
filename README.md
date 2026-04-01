@@ -1,15 +1,20 @@
 # Umbra
 
-Umbra is an Electron desktop copilot for technical interviews and live meetings. It combines AssemblyAI streaming transcription, screenshot capture, and Gemini-powered responses in a compact always-on-top window.
+Umbra is an Electron desktop copilot for technical interviews and live meetings. It combines AssemblyAI streaming transcription, screenshot capture, and LLM responses (Anthropic Claude, OpenAI, or a local Ollama model) in a compact always-on-top window.
 
 Use it only in environments where recording, transcription, screenshots, and AI assistance are allowed.
 
-Real-time AI assistant for meetings and interviews.
-
 ## Looks
 
-<img width="1137" height="1014" alt="image" src="https://github.com/user-attachments/assets/b9250f36-5623-45da-ab8e-8265ee079e92" />
-<img width="1137" height="1019" alt="image" src="https://github.com/user-attachments/assets/68c14d18-fcb3-4ee5-9f98-d137b744156e" />
+**Compact mode** — toolbar with audio controls, **AI Answer**, **Analyze Screen**, timer, and a thin strip for transcripts and AI output.
+
+![Umbra compact toolbar](./assets/umbra-ui-compact.png)
+
+**Expanded mode** — **Transcription Monitor** (Meeting / You sources), **AI Assistant** chat, and manual context input.
+
+![Umbra expanded window](./assets/umbra-ui-expanded.png)
+
+On the toolbar, **AI Answer** runs the full-context *Ask AI* flow; **Analyze Screen** runs *Screen AI* on enabled screenshots. Other actions (Suggest, Notes, Insights) are available from the menu and keyboard shortcuts (see `src/config.js`).
 
 ---
 
@@ -18,8 +23,8 @@ Real-time AI assistant for meetings and interviews.
 - Dual-source live transcription for host/system audio and microphone input, with per-source toggles and a live monitor.
 - Four AI action buttons, each with a distinct purpose — described in detail below.
 - Per-message `AI` / `Off` controls let you keep transcript chunks, screenshots, and prior AI replies visible while excluding them from future prompts.
-- Multiple Gemini API keys are supported as a comma-separated list, with automatic failover on quota or authentication errors.
-- Settings support Gemini model selection, AssemblyAI speech model selection, programming language preference, and window opacity.
+- **LLM provider** (Settings): Anthropic Claude, OpenAI, or Ollama (local). Multiple API keys per cloud provider are supported as a comma-separated list, with automatic failover on quota or authentication errors.
+- Settings include model selection per provider, AssemblyAI speech model, **programming languages** (multi-select, comma-stored priority order), and window opacity.
 - Session state is persisted to `cache/app-state.json`, and screenshot retention is bounded by `MAX_SCREENSHOTS`.
 - **Mobile companion** — a built-in web server exposes a mobile-optimised chat interface on `http://localhost:7823`. Connect your phone over USB tethering and control the assistant from your pocket.
 
@@ -27,9 +32,9 @@ Real-time AI assistant for meetings and interviews.
 
 Each button sends a different slice of context to the AI and is designed for a different moment in the workflow.
 
-### Ask AI
+### Ask AI (toolbar: **AI Answer**)
 
-The full-context answer button. Use this when you want a complete, thorough response.
+The full-context answer control. Use this when you want a complete, thorough response.
 
 **What it sends:** all enabled transcript messages + all enabled screenshots + full conversation history.
 
@@ -44,7 +49,7 @@ Use Ask AI when you need the complete answer, not just the opening move.
 
 ---
 
-### Screen AI
+### Screen AI (toolbar: **Analyze Screen**)
 
 The screenshot interpreter. Use this when the question or problem is visible on screen.
 
@@ -103,7 +108,7 @@ Use Notes to produce a shareable record at the end of a meeting or interview deb
 - Windows 10/11 is the primary development target for this repo.
 - Node.js `20.x` is recommended. The existing docs and environment were prepared around `20.20.1`.
 - npm `10+`
-- At least one Gemini API key (configured in the app Settings UI)
+- **LLM:** Configure at least one of: Anthropic API key(s), OpenAI API key(s), or Ollama (no key; local server). Set the active provider in Settings.
 - One AssemblyAI API key (configured in the app Settings UI)
 
 ### Setup
@@ -171,7 +176,7 @@ winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --accept-pack
 
 [`src/config.js`](./src/config.js) defines the app's configurable lists and defaults:
 
-- Gemini models
+- AI provider options and model lists (Claude, OpenAI, Ollama)
 - AssemblyAI speech models
 - Programming language options for code-oriented prompts
 - Global keyboard shortcuts
@@ -202,7 +207,7 @@ When the app starts, a lightweight HTTP + WebSocket server starts automatically 
 | **Screenshot** | Triggers a stealth desktop capture. A badge shows the current count. |
 | **Ask AI** | Sends the typed context (and any captured screenshots) to the AI; response streams in real time. |
 | **Mic** | Starts your phone's microphone, streams PCM audio over the USB connection to AssemblyAI, and shows live transcripts in the chat. |
-| **Clear** | Clears the Gemini conversation history and STT buffer. |
+| **Clear** | Clears the AI conversation history and STT buffer. |
 
 The text input above the toolbar lets you type a question or extra context before pressing **Ask AI** or the send button. Both the desktop and mobile views stay in sync — transcripts, AI responses, and screenshot events appear on both screens simultaneously.
 
@@ -227,7 +232,7 @@ The text input above the toolbar lets you type a question or extra context befor
 
 - `src/main-process/` is the Electron control plane (startup flow, window behavior, global shortcuts, and IPC registration).
 - `src/main-process/features/mobile-server/` is the mobile companion — HTTP + WebSocket server (`server.js`) and the mobile UI (`mobile.html`).
-- `src/services/` contains reusable domain logic (Gemini prompts/runtime behavior, AssemblyAI streaming/transcript history, persisted app-state).
+- `src/services/` contains reusable domain logic (AI services and prompts under `services/ai/`, AssemblyAI streaming/transcript history, persisted app-state).
 - `src/windows/assistant/preload/` is the renderer-safe API boundary (`window.electronAPI` invoke + event wrappers).
 - `src/windows/assistant/renderer/features/` contains modular UI logic (chat, listeners, settings, transcription, context bundling, layout).
 - `src/windows/legacy/` contains old experiments and is not part of the active runtime path.
@@ -241,7 +246,7 @@ src/
     features/
       mobile-server/     Mobile companion HTTP+WS server and mobile UI HTML
   services/
-    ai/                  Gemini service + prompt builders
+    ai/                  LLM services (Claude, OpenAI, Ollama) + shared prompt builders
     assembly-ai/         Streaming STT service + transcript history manager
     state/               App-state load/save helpers
   windows/
@@ -251,7 +256,7 @@ src/
       window.js          BrowserWindow creation/config
       renderer.js        Renderer composition root
     legacy/              Older experimental files kept out of the active flow
-assets/                  Build icons and packaging assets
+assets/                  Build icons, README screenshots (`umbra-ui-*.png`), packaging assets
 cache/                   Generated app state in development
 .stealth_screenshots/    Session screenshots in development
 dist/                    Packaged build output

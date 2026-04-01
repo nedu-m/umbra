@@ -6,10 +6,14 @@ export function createSettingsPanelManager({
     settingsPanel,
     settingAiProvider,
     claudeSettingsGroup,
+    openaiSettingsGroup,
     ollamaSettingsGroup,
     settingClaudeKey,
     toggleClaudeKeyVisibilityBtn,
     settingClaudeModel,
+    settingOpenaiKey,
+    toggleOpenaiKeyVisibilityBtn,
+    settingOpenaiModel,
     settingProgrammingLanguage,
     settingOllamaBaseUrl,
     settingOllamaModel,
@@ -83,13 +87,18 @@ export function createSettingsPanelManager({
     }
 
     function updateProviderVisibility(provider) {
-        const isClaude = provider !== 'ollama';
+        const isClaude = provider === 'claude';
+        const isOpenai = provider === 'openai';
+        const isOllama = provider === 'ollama';
 
         if (claudeSettingsGroup) {
             claudeSettingsGroup.classList.toggle('hidden', !isClaude);
         }
+        if (openaiSettingsGroup) {
+            openaiSettingsGroup.classList.toggle('hidden', !isOpenai);
+        }
         if (ollamaSettingsGroup) {
-            ollamaSettingsGroup.classList.toggle('hidden', isClaude);
+            ollamaSettingsGroup.classList.toggle('hidden', !isOllama);
         }
     }
 
@@ -199,28 +208,64 @@ export function createSettingsPanelManager({
             : configuredModels[0];
     }
 
-    function populateProgrammingLanguageOptions(languages, selectedLanguage) {
+    function populateOpenAiModelOptions(models, selectedModel) {
+        if (!settingOpenaiModel) {
+            return;
+        }
+
+        settingOpenaiModel.innerHTML = '';
+
+        const configuredModels = Array.isArray(models) ? models : [];
+        if (configuredModels.length === 0) {
+            throw new Error('OpenAI models are not configured.');
+        }
+
+        configuredModels.forEach((modelName) => {
+            const option = document.createElement('option');
+            option.value = modelName;
+            option.textContent = modelName;
+            settingOpenaiModel.appendChild(option);
+        });
+
+        settingOpenaiModel.value = configuredModels.includes(selectedModel)
+            ? selectedModel
+            : configuredModels[0];
+    }
+
+    function renderProgrammingLanguageCheckboxes(allLanguages, selectedCsv, defaultSingle) {
         if (!settingProgrammingLanguage) {
             return;
         }
 
         settingProgrammingLanguage.innerHTML = '';
 
-        const configuredLanguages = Array.isArray(languages) ? languages : [];
+        const configuredLanguages = Array.isArray(allLanguages) ? allLanguages : [];
         if (configuredLanguages.length === 0) {
             throw new Error('Programming languages are not configured.');
         }
 
-        configuredLanguages.forEach((languageName) => {
-            const option = document.createElement('option');
-            option.value = languageName;
-            option.textContent = languageName;
-            settingProgrammingLanguage.appendChild(option);
-        });
+        const selected = new Set(
+            String(selectedCsv || '').split(',').map((s) => s.trim()).filter(Boolean)
+        );
+        const fallback =
+            defaultSingle && configuredLanguages.includes(defaultSingle)
+                ? defaultSingle
+                : configuredLanguages[0];
 
-        settingProgrammingLanguage.value = configuredLanguages.includes(selectedLanguage)
-            ? selectedLanguage
-            : configuredLanguages[0];
+        for (const languageName of configuredLanguages) {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.value = languageName;
+            if (selected.size === 0) {
+                input.checked = languageName === fallback;
+            } else {
+                input.checked = selected.has(languageName);
+            }
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(languageName));
+            settingProgrammingLanguage.appendChild(label);
+        }
     }
 
     function populateAssemblyAiSpeechModelOptions(models, selectedModel) {
@@ -258,7 +303,7 @@ export function createSettingsPanelManager({
                 applySettingsShortcutConfig?.(settings);
 
                 // AI Provider
-                const activeProvider = settings.aiProvider || 'gemini';
+                const activeProvider = settings.aiProvider || 'claude';
                 if (settingAiProvider) {
                     settingAiProvider.value = activeProvider;
                 }
@@ -268,14 +313,18 @@ export function createSettingsPanelManager({
                 if (settingClaudeKey) settingClaudeKey.value = settings.claudeApiKey || '';
                 populateClaudeModelOptions(settings.claudeModels, settings.claudeModel || settings.defaultClaudeModel);
 
+                if (settingOpenaiKey) settingOpenaiKey.value = settings.openaiApiKey || '';
+                populateOpenAiModelOptions(settings.openaiModels, settings.openaiModel || settings.defaultOpenAiModel);
+
                 // Ollama settings
                 if (settingOllamaBaseUrl) settingOllamaBaseUrl.value = settings.ollamaBaseUrl || 'http://localhost:11434';
                 if (settingOllamaModel) settingOllamaModel.value = settings.ollamaModel || 'llama3.2';
                 if (settingOllamaModelSelect) settingOllamaModelSelect.classList.add('hidden');
 
-                populateProgrammingLanguageOptions(
+                renderProgrammingLanguageCheckboxes(
                     settings.programmingLanguages,
-                    settings.programmingLanguage || settings.defaultProgrammingLanguage
+                    settings.programmingLanguage || settings.defaultProgrammingLanguage,
+                    settings.defaultProgrammingLanguage
                 );
                 if (settingAssemblyKey) settingAssemblyKey.value = settings.assemblyAiApiKey || '';
                 populateAssemblyAiSpeechModelOptions(
@@ -298,6 +347,7 @@ export function createSettingsPanelManager({
         }
 
         setApiKeyFieldVisibility(settingClaudeKey, toggleClaudeKeyVisibilityBtn, 'Claude', false);
+        setApiKeyFieldVisibility(settingOpenaiKey, toggleOpenaiKeyVisibilityBtn, 'OpenAI', false);
         setApiKeyFieldVisibility(settingAssemblyKey, toggleAssemblyKeyVisibilityBtn, 'AssemblyAI', false);
 
         settingsPanel.classList.remove('hidden');
@@ -309,12 +359,13 @@ export function createSettingsPanelManager({
         }
 
         setApiKeyFieldVisibility(settingClaudeKey, toggleClaudeKeyVisibilityBtn, 'Claude', false);
+        setApiKeyFieldVisibility(settingOpenaiKey, toggleOpenaiKeyVisibilityBtn, 'OpenAI', false);
         setApiKeyFieldVisibility(settingAssemblyKey, toggleAssemblyKeyVisibilityBtn, 'AssemblyAI', false);
     }
 
     async function saveSettings() {
         try {
-            const aiProvider = settingAiProvider ? settingAiProvider.value : 'gemini';
+            const aiProvider = settingAiProvider ? settingAiProvider.value : 'claude';
 
             if (aiProvider === 'claude') {
                 if (!settingClaudeModel || settingClaudeModel.options.length === 0) {
@@ -322,8 +373,26 @@ export function createSettingsPanelManager({
                 }
             }
 
-            if (!settingProgrammingLanguage || settingProgrammingLanguage.options.length === 0) {
+            if (aiProvider === 'openai') {
+                if (!settingOpenaiModel || settingOpenaiModel.options.length === 0) {
+                    throw new Error('OpenAI models are not configured.');
+                }
+            }
+
+            const programmingCheckboxes = settingProgrammingLanguage
+                ? settingProgrammingLanguage.querySelectorAll('input[type=checkbox]')
+                : [];
+            if (!settingProgrammingLanguage || programmingCheckboxes.length === 0) {
                 throw new Error('Programming languages are not configured.');
+            }
+
+            const selectedProgrammingLanguages = Array.from(
+                settingProgrammingLanguage.querySelectorAll('input[type=checkbox]:checked')
+            ).map((input) => input.value);
+
+            if (selectedProgrammingLanguages.length === 0) {
+                showFeedback?.('Select at least one programming language.', 'error');
+                return { success: false, error: 'Select at least one programming language.' };
             }
 
             if (!settingAssemblyModel || settingAssemblyModel.options.length === 0) {
@@ -333,11 +402,13 @@ export function createSettingsPanelManager({
             const settings = {
                 aiProvider,
                 claudeApiKey: settingClaudeKey ? settingClaudeKey.value.trim() : '',
+                openaiApiKey: settingOpenaiKey ? settingOpenaiKey.value.trim() : '',
                 assemblyAiApiKey: settingAssemblyKey ? settingAssemblyKey.value.trim() : '',
                 claudeModel: settingClaudeModel ? settingClaudeModel.value : '',
+                openaiModel: settingOpenaiModel ? settingOpenaiModel.value : '',
                 ollamaBaseUrl: settingOllamaBaseUrl ? settingOllamaBaseUrl.value.trim() : '',
                 ollamaModel: settingOllamaModel ? settingOllamaModel.value.trim() : '',
-                programmingLanguage: settingProgrammingLanguage.value,
+                programmingLanguage: selectedProgrammingLanguages.join(','),
                 assemblyAiSpeechModel: settingAssemblyModel.value,
                 windowOpacityLevel: normalizeWindowOpacityLevel(settingWindowOpacity?.value),
                 autoAnswerDebounceMs: normalizePositiveInteger(settingAutoAnswerDebounceMs?.value, 1800, 250),
@@ -363,6 +434,7 @@ export function createSettingsPanelManager({
     }
 
     bindApiKeyVisibilityToggle(settingClaudeKey, toggleClaudeKeyVisibilityBtn, 'Claude');
+    bindApiKeyVisibilityToggle(settingOpenaiKey, toggleOpenaiKeyVisibilityBtn, 'OpenAI');
     bindApiKeyVisibilityToggle(settingAssemblyKey, toggleAssemblyKeyVisibilityBtn, 'AssemblyAI');
     bindProviderToggle();
     bindFetchOllamaModels();

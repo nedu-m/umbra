@@ -7,7 +7,8 @@
 // ============================================================================
 
 const {
-  resolveProgrammingLanguage
+  normalizeProgrammingLanguages,
+  serializeProgrammingLanguages
 } = require('../../config');
 const {
   buildAnswerQuestionPrompt,
@@ -26,7 +27,9 @@ class OllamaService {
   constructor(options = {}) {
     this.baseUrl = String(options.baseUrl || DEFAULT_OLLAMA_BASE_URL).replace(/\/+$/, '');
     this.modelName = String(options.modelName || DEFAULT_OLLAMA_MODEL).trim();
-    this.programmingLanguage = resolveProgrammingLanguage(options.programmingLanguage);
+    this.programmingLanguage = serializeProgrammingLanguages(
+      normalizeProgrammingLanguages(options.programmingLanguage)
+    );
 
     this.requestQueue = [];
     this.lastRequestTime = 0;
@@ -50,8 +53,8 @@ class OllamaService {
     const previousProgrammingLanguage = this.programmingLanguage;
     const nextBaseUrl = String(options.baseUrl ?? this.baseUrl).replace(/\/+$/, '');
     const nextModelName = String(options.modelName ?? this.modelName).trim();
-    const nextProgrammingLanguage = resolveProgrammingLanguage(
-      options.programmingLanguage ?? this.programmingLanguage
+    const nextProgrammingLanguage = serializeProgrammingLanguages(
+      normalizeProgrammingLanguages(options.programmingLanguage ?? this.programmingLanguage)
     );
 
     const baseUrlChanged = nextBaseUrl !== this.baseUrl;

@@ -72,9 +72,16 @@ function normalizeApplicationEnvironment(source = {}) {
     source.geminiApiKey ?? source.geminiApiKeys  // migrate old field name gracefully
   );
 
+  const openaiApiKeys = normalizeClaudeApiKeys(
+    source.openaiApiKey ?? source.openaiApiKeys ??
+    source.OPENAI_API_KEY ?? source.OPENAI_API_KEYS ?? ''
+  );
+
   return {
     claudeApiKey: claudeApiKeys.join(','),
     claudeApiKeys,
+    openaiApiKey: openaiApiKeys.join(','),
+    openaiApiKeys,
     assemblyAiApiKey: String(
       source.assemblyAiApiKey ?? source.ASSEMBLY_AI_API_KEY ?? ''
     ).trim(),
@@ -109,6 +116,7 @@ function normalizeApplicationEnvironment(source = {}) {
 
 function syncProcessEnvironment(environment) {
   process.env.ANTHROPIC_API_KEY = environment.claudeApiKey;
+  process.env.OPENAI_API_KEY = environment.openaiApiKey;
   process.env.ASSEMBLY_AI_API_KEY = environment.assemblyAiApiKey;
   process.env.HIDE_FROM_SCREEN_CAPTURE = String(environment.hideFromScreenCapture);
   process.env.START_HIDDEN = String(environment.startHidden);

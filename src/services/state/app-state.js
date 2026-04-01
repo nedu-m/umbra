@@ -8,9 +8,12 @@ function getDefaultAppState() {
   return {
     aiProvider: null,
     claudeApiKey: null,
+    openaiApiKey: null,
     assemblyAiApiKey: null,
     claudeApiKeyIndex: 0,
+    openaiApiKeyIndex: 0,
     claudeModel: null,
+    openaiModel: null,
     ollamaBaseUrl: null,
     ollamaModel: null,
     assemblyAiSpeechModel: null,
@@ -25,7 +28,7 @@ function sanitizeAppState(state) {
 
   if (state && typeof state === 'object' && !Array.isArray(state)) {
     const aiProvider = String(state.aiProvider ?? '').trim().toLowerCase();
-    if (aiProvider === 'claude' || aiProvider === 'ollama') {
+    if (aiProvider === 'claude' || aiProvider === 'openai' || aiProvider === 'ollama') {
       nextState.aiProvider = aiProvider;
     }
 
@@ -34,6 +37,12 @@ function sanitizeAppState(state) {
     if (typeof claudeApiKeyRaw === 'string') {
       const claudeApiKey = claudeApiKeyRaw.trim();
       nextState.claudeApiKey = claudeApiKey || null;
+    }
+
+    const openaiApiKeyRaw = state.openaiApiKey;
+    if (typeof openaiApiKeyRaw === 'string') {
+      const openaiApiKey = openaiApiKeyRaw.trim();
+      nextState.openaiApiKey = openaiApiKey || null;
     }
 
     if (typeof state.assemblyAiApiKey === 'string') {
@@ -48,9 +57,20 @@ function sanitizeAppState(state) {
       nextState.claudeApiKeyIndex = claudeApiKeyIndex;
     }
 
+    const openaiApiKeyIndex = Number.parseInt(
+      String(state.openaiApiKeyIndex ?? ''), 10
+    );
+    if (Number.isFinite(openaiApiKeyIndex) && openaiApiKeyIndex >= 0) {
+      nextState.openaiApiKeyIndex = openaiApiKeyIndex;
+    }
+
     const claudeModelRaw = state.claudeModel ?? state.geminiModel;
     if (typeof claudeModelRaw === 'string' && claudeModelRaw.trim()) {
       nextState.claudeModel = claudeModelRaw.trim();
+    }
+
+    if (typeof state.openaiModel === 'string' && state.openaiModel.trim()) {
+      nextState.openaiModel = state.openaiModel.trim();
     }
 
     if (typeof state.ollamaBaseUrl === 'string' && state.ollamaBaseUrl.trim()) {

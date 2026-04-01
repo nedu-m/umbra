@@ -20,17 +20,23 @@ function registerSettingsIpc({
     const appEnvironment = getAppEnvironment();
     const appState = getAppState();
     const claudeApiKey = typeof appState?.claudeApiKey === 'string' ? appState.claudeApiKey : '';
+    const openaiApiKey = typeof appState?.openaiApiKey === 'string' ? appState.openaiApiKey : '';
     const assemblyAiApiKey = typeof appState?.assemblyAiApiKey === 'string' ? appState.assemblyAiApiKey : '';
 
     return {
       aiProvider: geminiRuntime.getActiveAiProvider(),
       claudeApiKey,
+      openaiApiKey,
       assemblyAiApiKey,
       hasClaudeApiKeys: claudeApiKey.split(',').map((value) => value.trim()).filter(Boolean).length > 0,
+      hasOpenAiApiKeys: openaiApiKey.split(',').map((value) => value.trim()).filter(Boolean).length > 0,
       hasAssemblyAiApiKey: assemblyAiApiKey.length > 0,
       claudeModel: geminiRuntime.getActiveClaudeModel(),
       claudeModels: geminiRuntime.getClaudeModels(),
       defaultClaudeModel: geminiRuntime.getDefaultClaudeModel(),
+      openaiModel: geminiRuntime.getActiveOpenAiModel(),
+      openaiModels: geminiRuntime.getOpenAiModels(),
+      defaultOpenAiModel: geminiRuntime.getDefaultOpenAiModel(),
       ollamaBaseUrl: geminiRuntime.getActiveOllamaBaseUrl(),
       ollamaModel: geminiRuntime.getActiveOllamaModel(),
       defaultOllamaBaseUrl: geminiRuntime.getDefaultOllamaBaseUrl(),
@@ -78,8 +84,10 @@ function registerSettingsIpc({
       const appEnvironment = getAppEnvironment();
       const nextAiProvider = geminiRuntime.setActiveAiProvider(settings.aiProvider);
       const nextClaudeApiKey = String(settings.claudeApiKey || '').trim();
+      const nextOpenaiApiKey = String(settings.openaiApiKey || '').trim();
       const nextAssemblyAiApiKey = String(settings.assemblyAiApiKey || '').trim();
       const nextClaudeModel = geminiRuntime.setActiveClaudeModel(settings.claudeModel);
+      const nextOpenAiModel = geminiRuntime.setActiveOpenAiModel(settings.openaiModel);
       const nextOllamaBaseUrl = geminiRuntime.setActiveOllamaBaseUrl(settings.ollamaBaseUrl);
       const nextOllamaModel = geminiRuntime.setActiveOllamaModel(settings.ollamaModel);
       const nextAssemblyModel = setAssemblyAiSpeechModel(settings.assemblyAiSpeechModel);
@@ -98,12 +106,16 @@ function registerSettingsIpc({
       });
 
       const keyState = geminiRuntime.setKeys(nextClaudeApiKey, 0);
+      const openaiKeyState = geminiRuntime.setOpenaiKeys(nextOpenaiApiKey, 0);
       const updatedAppState = saveAppState(app, {
         aiProvider: nextAiProvider,
         claudeApiKey: nextClaudeApiKey,
+        openaiApiKey: nextOpenaiApiKey,
         assemblyAiApiKey: nextAssemblyAiApiKey,
         claudeApiKeyIndex: keyState.activeApiKeyIndex,
+        openaiApiKeyIndex: openaiKeyState.activeOpenaiApiKeyIndex,
         claudeModel: nextClaudeModel,
+        openaiModel: nextOpenAiModel,
         ollamaBaseUrl: nextOllamaBaseUrl,
         ollamaModel: nextOllamaModel,
         assemblyAiSpeechModel: nextAssemblyModel,
@@ -125,6 +137,13 @@ function registerSettingsIpc({
         geminiRuntime.initializeOllamaService(
           nextOllamaBaseUrl,
           nextOllamaModel,
+          nextProgrammingLanguage
+        );
+      } else if (nextAiProvider === 'openai') {
+        console.log(`Applied OpenAI API key index: ${openaiKeyState.activeOpenaiApiKeyIndex + 1}/${openaiKeyState.openaiApiKeys.length}`);
+        geminiRuntime.initializeOpenAiService(
+          openaiKeyState.activeOpenaiApiKey,
+          nextOpenAiModel,
           nextProgrammingLanguage
         );
       } else {

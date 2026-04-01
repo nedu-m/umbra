@@ -1,15 +1,13 @@
 // ============================================================================
-// CLAUDE AI SERVICE
+// OPENAI AI SERVICE
 // ============================================================================
-// Uses the Anthropic SDK (claude-sonnet-4-6 and family).
-// Exposes the same interface as GeminiService so the rest of the app is
-// unaware of the provider swap.
+// Uses the OpenAI Chat Completions API (gpt-4o family).
+// Exposes the same interface as ClaudeService so the runtime can swap providers.
 // ============================================================================
 
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 const {
-  getDefaultClaudeModel,
-  resolveClaudeModel,
+  resolveOpenAiModel,
   normalizeProgrammingLanguages,
   serializeProgrammingLanguages
 } = require('../../config');
@@ -23,18 +21,15 @@ const {
   buildSuggestResponsePrompt
 } = require('./prompts');
 
-// Convert Gemini-format imageParts to Claude's content block format.
-// Input:  [{ inlineData: { mimeType, data } }]
-// Output: [{ type: 'image', source: { type: 'base64', media_type, data } }]
-function toClaudeImageBlocks(imageParts) {
+function toOpenAiImageContentParts(imageParts) {
   return (Array.isArray(imageParts) ? imageParts : []).map((part) => {
     if (part && part.inlineData) {
+      const mimeType = part.inlineData.mimeType || 'image/png';
+      const data = part.inlineData.data;
       return {
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: part.inlineData.mimeType || 'image/png',
-          data: part.inlineData.data
+        type: 'image_url',
+        image_url: {
+          url: `data:${mimeType};base64,${data}`
         }
       };
     }
@@ -42,10 +37,10 @@ function toClaudeImageBlocks(imageParts) {
   }).filter(Boolean);
 }
 
-class ClaudeService {
+class OpenAiService {
   constructor(apiKey, options = {}) {
     this.apiKey = String(apiKey || '').trim();
-    this.modelName = resolveClaudeModel(options.modelName);
+    this.modelName = resolveOpenAiModel(options.modelName);
     this.programmingLanguage = serializeProgrammingLanguages(
       normalizeProgrammingLanguages(options.programmingLanguage)
     );
@@ -55,7 +50,6 @@ class ClaudeService {
     this.conversationHistory = [];
     this.maxHistoryLength = 20;
 
-    // Expose a truthy `model` property so existing ipc.js null-checks pass.
     this.model = this.modelName;
 
     this._initializeClient();
@@ -63,17 +57,17 @@ class ClaudeService {
 
   _initializeClient() {
     try {
-      console.log('Initializing Claude client with model:', this.modelName);
-      this.client = new Anthropic({ apiKey: this.apiKey });
+      console.log('Initializing OpenAI client with model:', this.modelName);
+      this.client = new OpenAI({ apiKey: this.apiKey });
     } catch (error) {
-      console.error('Failed to initialize Anthropic client:', error);
+      console.error('Failed to initialize OpenAI client:', error);
       this.client = null;
     }
   }
 
   updateConfiguration(options = {}) {
     const nextApiKey = String(options.apiKey ?? this.apiKey ?? '').trim();
-    const nextModelName = resolveClaudeModel(options.modelName ?? this.modelName);
+    const nextModelName = resolveOpenAiModel(options.modelName ?? this.modelName);
     const nextLanguage = serializeProgrammingLanguages(
       normalizeProgrammingLanguages(options.programmingLanguage ?? this.programmingLanguage)
     );
@@ -115,10 +109,11 @@ class ClaudeService {
       status === 401 ||
       status === 403 ||
       message.includes('invalid api key') ||
+      message.includes('incorrect api key') ||
       message.includes('authentication') ||
       message.includes('unauthorized') ||
       message.includes('forbidden') ||
-      message.includes('api_key_invalid')
+      message.includes('invalid_api_key')
     );
   }
 
@@ -127,68 +122,56 @@ class ClaudeService {
     return status === 500 || status === 502 || status === 503 || status === 529;
   }
 
-  // Build a single user message content array from text prompt + optional images.
-  _buildUserContent(promptText, imageBlocks = []) {
+  _buildUserContent(promptText, imageParts = []) {
+    const imageContent = toOpenAiImageContentParts(imageParts);
     const content = [];
-    if (imageBlocks.length > 0) {
-      content.push(...imageBlocks);
+    if (imageContent.length > 0) {
+      content.push(...imageContent);
     }
     content.push({ type: 'text', text: promptText });
     return content;
   }
 
-  // Core request executor — handles both streaming and non-streaming.
-  async _executeRequest({ promptText, imageBlocks = [], onChunk, requestType = 'text' }, retryCount = 0) {
+  async _executeRequest({ promptText, imageParts = [], onChunk, requestType = 'text' }, retryCount = 0) {
     try {
-      const userContent = this._buildUserContent(promptText, imageBlocks);
+      const userContent = this._buildUserContent(promptText, imageParts);
 
       if (typeof onChunk === 'function') {
-        console.log(`[Claude API] Streaming ${requestType} request started`);
-        const stream = this.client.messages.stream({
+        console.log(`[OpenAI API] Streaming ${requestType} request started`);
+        const stream = await this.client.chat.completions.create({
           model: this.modelName,
           max_tokens: 8192,
-          messages: [{ role: 'user', content: userContent }]
+          messages: [{ role: 'user', content: userContent }],
+          stream: true
         });
 
         let fullText = '';
         let chunkIndex = 0;
-        let firstChunkSent = false;
-
-        for await (const event of stream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta?.type === 'text_delta' &&
-            event.delta.text
-          ) {
-            const text = event.delta.text;
+        for await (const chunk of stream) {
+          const text = chunk.choices[0]?.delta?.content || '';
+          if (text) {
             fullText += text;
             chunkIndex += 1;
-            firstChunkSent = true;
             onChunk({ text, index: chunkIndex });
           }
         }
 
-        console.log(`[Claude API] Streaming ${requestType} completed (${chunkIndex} chunks, ${fullText.length} chars)`);
+        console.log(`[OpenAI API] Streaming ${requestType} completed (${chunkIndex} chunks, ${fullText.length} chars)`);
         return fullText;
       }
 
-      // Non-streaming
-      console.log(`[Claude API] Non-streaming ${requestType} request started`);
-      const response = await this.client.messages.create({
+      console.log(`[OpenAI API] Non-streaming ${requestType} request started`);
+      const response = await this.client.chat.completions.create({
         model: this.modelName,
         max_tokens: 8192,
         messages: [{ role: 'user', content: userContent }]
       });
 
-      const responseText = response.content
-        .filter((block) => block.type === 'text')
-        .map((block) => block.text)
-        .join('');
-
-      console.log(`[Claude API] Non-streaming ${requestType} completed (${responseText.length} chars)`);
+      const responseText = response.choices[0]?.message?.content || '';
+      console.log(`[OpenAI API] Non-streaming ${requestType} completed (${responseText.length} chars)`);
       return responseText;
     } catch (error) {
-      console.error(`Claude request error (attempt ${retryCount + 1}):`, error.message);
+      console.error(`OpenAI request error (attempt ${retryCount + 1}):`, error.message);
 
       if (this.isQuotaExhaustedError(error) || this.isAuthenticationError(error)) {
         throw error;
@@ -198,7 +181,7 @@ class ClaudeService {
         const backoffTime = Math.pow(2, retryCount) * 2000;
         console.log(`Retrying in ${backoffTime}ms...`);
         await new Promise((resolve) => setTimeout(resolve, backoffTime));
-        return this._executeRequest({ promptText, imageBlocks, onChunk, requestType }, retryCount + 1);
+        return this._executeRequest({ promptText, imageParts, onChunk, requestType }, retryCount + 1);
       }
 
       throw error;
@@ -233,10 +216,9 @@ class ClaudeService {
       screenshotCount: imageParts.length
     });
 
-    const imageBlocks = toClaudeImageBlocks(imageParts);
     const result = await this._executeRequest({
       promptText: prompt,
-      imageBlocks,
+      imageParts,
       onChunk: options.onChunk,
       requestType: 'screenshot-analysis'
     });
@@ -287,10 +269,9 @@ class ClaudeService {
       programmingLanguage: this.programmingLanguage
     });
 
-    const imageBlocks = toClaudeImageBlocks(imageParts);
     const result = await this._executeRequest({
       promptText: prompt,
-      imageBlocks,
+      imageParts,
       onChunk: options.onChunk,
       requestType: 'ask-ai-with-screenshots'
     });
@@ -371,4 +352,4 @@ class ClaudeService {
   }
 }
 
-module.exports = ClaudeService;
+module.exports = OpenAiService;

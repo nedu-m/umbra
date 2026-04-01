@@ -1,6 +1,6 @@
 // AI provider configuration.
-// Supported providers: 'claude' and 'ollama'.
-const AI_PROVIDERS = ['claude', 'ollama'];
+// Supported providers: 'claude', 'openai', and 'ollama'.
+const AI_PROVIDERS = ['claude', 'openai', 'ollama'];
 const DEFAULT_AI_PROVIDER = 'claude';
 
 const DEFAULT_OLLAMA_BASE_URL = 'http://localhost:11434';
@@ -12,6 +12,13 @@ const CLAUDE_MODELS = [
   'claude-sonnet-4-6',
   'claude-opus-4-6',
   'claude-haiku-4-5-20251001'
+];
+
+// OpenAI model configuration (Chat Completions API).
+const OPENAI_MODELS = [
+  'gpt-4o',
+  'gpt-4o-mini',
+  'gpt-4-turbo'
 ];
 
 // AssemblyAI speech model configuration.
@@ -194,6 +201,26 @@ function resolveClaudeModel(modelName) {
   return isConfiguredClaudeModel(modelName) ? modelName : getDefaultClaudeModel();
 }
 
+function getOpenAiModels() {
+  if (!Array.isArray(OPENAI_MODELS) || OPENAI_MODELS.length === 0) {
+    throw new Error('OpenAI models are not configured. Add at least one model to src/config.js.');
+  }
+
+  return [...OPENAI_MODELS];
+}
+
+function getDefaultOpenAiModel() {
+  return getOpenAiModels()[0];
+}
+
+function isConfiguredOpenAiModel(modelName) {
+  return getOpenAiModels().includes(modelName);
+}
+
+function resolveOpenAiModel(modelName) {
+  return isConfiguredOpenAiModel(modelName) ? modelName : getDefaultOpenAiModel();
+}
+
 // Programming language configuration functions
 function getProgrammingLanguages() {
   if (!Array.isArray(PROGRAMMING_LANGUAGES) || PROGRAMMING_LANGUAGES.length === 0) {
@@ -211,10 +238,40 @@ function isConfiguredProgrammingLanguage(languageName) {
   return getProgrammingLanguages().includes(languageName);
 }
 
-function resolveProgrammingLanguage(languageName) {
-  return isConfiguredProgrammingLanguage(languageName)
-    ? languageName
-    : getDefaultProgrammingLanguage();
+/** Comma-separated string, array of names, or single name. Preserves order, dedupes. */
+function normalizeProgrammingLanguages(value) {
+  const configured = getProgrammingLanguages();
+  const seen = new Set();
+  const out = [];
+  const parts = Array.isArray(value)
+    ? value
+    : String(value ?? '').split(',');
+
+  for (const raw of parts) {
+    const name = String(raw || '').trim();
+    if (!name || seen.has(name)) {
+      continue;
+    }
+    if (configured.includes(name)) {
+      seen.add(name);
+      out.push(name);
+    }
+  }
+
+  if (out.length === 0) {
+    return [getDefaultProgrammingLanguage()];
+  }
+
+  return out;
+}
+
+function serializeProgrammingLanguages(value) {
+  return normalizeProgrammingLanguages(value).join(',');
+}
+
+/** Primary language for code fences and single-language fallbacks. */
+function resolveProgrammingLanguage(languageInput) {
+  return normalizeProgrammingLanguages(languageInput)[0];
 }
 
 // AssemblyAI speech model configuration functions
@@ -289,6 +346,9 @@ module.exports = {
   getDefaultAssemblyAiSpeechModel,
   getClaudeModels,
   getDefaultClaudeModel,
+  getOpenAiModels,
+  getDefaultOpenAiModel,
+  isConfiguredOpenAiModel,
   getKeyboardShortcutAccelerator,
   getKeyboardShortcutById,
   getKeyboardShortcuts,
@@ -297,7 +357,10 @@ module.exports = {
   isConfiguredAssemblyAiSpeechModel,
   isConfiguredClaudeModel,
   isConfiguredProgrammingLanguage,
+  normalizeProgrammingLanguages,
+  serializeProgrammingLanguages,
   resolveAssemblyAiSpeechModel,
   resolveClaudeModel,
+  resolveOpenAiModel,
   resolveProgrammingLanguage
 };

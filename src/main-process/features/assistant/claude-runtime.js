@@ -1,5 +1,6 @@
 const ClaudeService = require('../../../services/ai/claude-service');
 const OllamaService = require('../../../services/ai/ollama-service');
+const OpenAiService = require('../../../services/ai/openai-service');
 const {
   resolveAiProvider,
   getAiProviders,
@@ -7,9 +8,13 @@ const {
   getDefaultOllamaBaseUrl,
   getDefaultOllamaModel,
   resolveClaudeModel,
-  resolveProgrammingLanguage,
+  resolveOpenAiModel,
+  normalizeProgrammingLanguages,
+  serializeProgrammingLanguages,
   getClaudeModels,
   getDefaultClaudeModel,
+  getOpenAiModels,
+  getDefaultOpenAiModel,
   getProgrammingLanguages,
   getDefaultProgrammingLanguage
 } = require('../../../config');
@@ -38,14 +43,19 @@ function normalizeClaudeApiKeys(keys) {
 function createClaudeRuntime() {
   let claudeService = null;
   let ollamaService = null;
+  let openaiService = null;
   let activeAiProvider = getDefaultAiProvider();
   let activeClaudeModel = getDefaultClaudeModel();
-  let activeProgrammingLanguage = getDefaultProgrammingLanguage();
+  let activeOpenAiModel = getDefaultOpenAiModel();
+  let activeProgrammingLanguage = serializeProgrammingLanguages(getDefaultProgrammingLanguage());
   let activeOllamaBaseUrl = getDefaultOllamaBaseUrl();
   let activeOllamaModel = getDefaultOllamaModel();
   let claudeApiKeys = [];
   let activeApiKeyIndex = 0;
+  let openaiApiKeys = [];
+  let activeOpenaiApiKeyIndex = 0;
   let activeKeyIndexChangeHandler = null;
+  let activeOpenaiKeyIndexChangeHandler = null;
 
   function notifyActiveKeyIndexChanged(index) {
     if (typeof activeKeyIndexChangeHandler !== 'function') {
@@ -55,6 +65,17 @@ function createClaudeRuntime() {
       activeKeyIndexChangeHandler(index);
     } catch (error) {
       console.error('Failed to persist active Claude API key index:', error);
+    }
+  }
+
+  function notifyActiveOpenaiKeyIndexChanged(index) {
+    if (typeof activeOpenaiKeyIndexChangeHandler !== 'function') {
+      return;
+    }
+    try {
+      activeOpenaiKeyIndexChangeHandler(index);
+    } catch (error) {
+      console.error('Failed to persist active OpenAI API key index:', error);
     }
   }
 
@@ -81,6 +102,29 @@ function createClaudeRuntime() {
     return activeApiKeyIndex;
   }
 
+  function normalizeOpenaiKeyIndex(index) {
+    if (openaiApiKeys.length === 0) {
+      return 0;
+    }
+    const parsedIndex = Number.parseInt(String(index ?? ''), 10);
+    const safeIndex = Number.isFinite(parsedIndex) ? parsedIndex : 0;
+    const maxIndex = openaiApiKeys.length - 1;
+    return Math.min(Math.max(safeIndex, 0), maxIndex);
+  }
+
+  function setActiveOpenaiApiKeyIndex(index, options = {}) {
+    const nextIndex = normalizeOpenaiKeyIndex(index);
+    const shouldNotify = options.notify !== false;
+    const changed = nextIndex !== activeOpenaiApiKeyIndex;
+    activeOpenaiApiKeyIndex = nextIndex;
+
+    if (changed && shouldNotify) {
+      notifyActiveOpenaiKeyIndexChanged(activeOpenaiApiKeyIndex);
+    }
+
+    return activeOpenaiApiKeyIndex;
+  }
+
   function getActiveApiKey() {
     if (claudeApiKeys.length === 0) {
       return '';
@@ -88,7 +132,20 @@ function createClaudeRuntime() {
     return claudeApiKeys[activeApiKeyIndex] || '';
   }
 
+  function getActiveOpenaiApiKey() {
+    if (openaiApiKeys.length === 0) {
+      return '';
+    }
+    return openaiApiKeys[activeOpenaiApiKeyIndex] || '';
+  }
+
   function hasApiKeys() {
+    if (activeAiProvider === 'ollama') {
+      return true;
+    }
+    if (activeAiProvider === 'openai') {
+      return openaiApiKeys.length > 0;
+    }
     return claudeApiKeys.length > 0;
   }
 
@@ -98,7 +155,7 @@ function createClaudeRuntime() {
     programmingLanguage = activeProgrammingLanguage
   ) {
     activeClaudeModel = resolveClaudeModel(modelName);
-    activeProgrammingLanguage = resolveProgrammingLanguage(programmingLanguage);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(programmingLanguage));
 
     try {
       if (!apiKey) {
@@ -135,10 +192,53 @@ function createClaudeRuntime() {
     }
   }
 
+  function initializeOpenAiService(
+    apiKey = getActiveOpenaiApiKey(),
+    modelName = activeOpenAiModel,
+    programmingLanguage = activeProgrammingLanguage
+  ) {
+    activeOpenAiModel = resolveOpenAiModel(modelName);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(programmingLanguage));
+
+    try {
+      if (!apiKey) {
+        console.error('OpenAI API key not configured in app settings');
+        openaiService = null;
+        return null;
+      }
+
+      console.log(
+        'Initializing OpenAI Service with model and language:',
+        activeOpenAiModel,
+        activeProgrammingLanguage
+      );
+
+      if (openaiService) {
+        openaiService.updateConfiguration({
+          apiKey,
+          modelName: activeOpenAiModel,
+          programmingLanguage: activeProgrammingLanguage
+        });
+      } else {
+        openaiService = new OpenAiService(apiKey, {
+          modelName: activeOpenAiModel,
+          programmingLanguage: activeProgrammingLanguage
+        });
+      }
+
+      console.log('OpenAI Service initialized successfully');
+      return openaiService;
+    } catch (error) {
+      openaiService = null;
+      console.error('Failed to initialize OpenAI Service:', error);
+      return null;
+    }
+  }
+
   function setKeys(apiKeys, preferredIndex = 0) {
     claudeApiKeys = normalizeClaudeApiKeys(apiKeys);
 
-    if (!hasApiKeys()) {
+    if (claudeApiKeys.length === 0) {
       setActiveApiKeyIndex(0);
       claudeService = null;
       return {
@@ -157,12 +257,37 @@ function createClaudeRuntime() {
     };
   }
 
+  function setOpenaiKeys(apiKeys, preferredIndex = 0) {
+    openaiApiKeys = normalizeClaudeApiKeys(apiKeys);
+
+    if (openaiApiKeys.length === 0) {
+      setActiveOpenaiApiKeyIndex(0);
+      openaiService = null;
+      return {
+        openaiApiKeys: [],
+        activeOpenaiApiKeyIndex: 0,
+        activeOpenaiApiKey: ''
+      };
+    }
+
+    setActiveOpenaiApiKeyIndex(preferredIndex);
+
+    return {
+      openaiApiKeys: [...openaiApiKeys],
+      activeOpenaiApiKeyIndex,
+      activeOpenaiApiKey: getActiveOpenaiApiKey()
+    };
+  }
+
   function getApiKeys() {
+    if (activeAiProvider === 'openai') {
+      return [...openaiApiKeys];
+    }
     return [...claudeApiKeys];
   }
 
   function switchToNextKey() {
-    if (!hasApiKeys()) {
+    if (claudeApiKeys.length === 0) {
       return { switched: false, activeApiKeyIndex, activeApiKey: '' };
     }
 
@@ -183,6 +308,28 @@ function createClaudeRuntime() {
     return { switched: true, activeApiKeyIndex, activeApiKey: getActiveApiKey() };
   }
 
+  function switchToNextOpenaiKey() {
+    if (openaiApiKeys.length === 0) {
+      return { switched: false, activeOpenaiApiKeyIndex, activeOpenaiApiKey: '' };
+    }
+
+    if (openaiApiKeys.length === 1) {
+      return { switched: false, activeOpenaiApiKeyIndex, activeOpenaiApiKey: getActiveOpenaiApiKey() };
+    }
+
+    const previousIndex = activeOpenaiApiKeyIndex;
+    const nextIndex = (activeOpenaiApiKeyIndex + 1) % openaiApiKeys.length;
+    setActiveOpenaiApiKeyIndex(nextIndex);
+
+    if (nextIndex === previousIndex) {
+      return { switched: false, activeOpenaiApiKeyIndex, activeOpenaiApiKey: getActiveOpenaiApiKey() };
+    }
+
+    initializeOpenAiService(getActiveOpenaiApiKey(), activeOpenAiModel, activeProgrammingLanguage);
+
+    return { switched: true, activeOpenaiApiKeyIndex, activeOpenaiApiKey: getActiveOpenaiApiKey() };
+  }
+
   function isSwitchEligibleError(error) {
     if (!error) {
       return false;
@@ -191,6 +338,12 @@ function createClaudeRuntime() {
       return true;
     }
     if (claudeService?.isAuthenticationError?.(error)) {
+      return true;
+    }
+    if (openaiService?.isQuotaExhaustedError?.(error)) {
+      return true;
+    }
+    if (openaiService?.isAuthenticationError?.(error)) {
       return true;
     }
 
@@ -211,7 +364,7 @@ function createClaudeRuntime() {
 
   function createAllKeysUnavailableError(cause) {
     const err = new Error(
-      'All configured Claude API keys are currently unavailable due to quota or authentication errors.'
+      'All configured API keys for this provider are currently unavailable due to quota or authentication errors.'
     );
     err.code = CLAUDE_ALL_KEYS_UNAVAILABLE_ERROR_CODE;
     err.isAllKeysUnavailable = true;
@@ -251,7 +404,57 @@ function createClaudeRuntime() {
       });
     }
 
-    if (!hasApiKeys()) {
+    if (activeAiProvider === 'openai') {
+      if (openaiApiKeys.length === 0) {
+        throw new Error('No OpenAI API key configured. Add it in Settings.');
+      }
+
+      const totalKeysOpenai = openaiApiKeys.length;
+      const startIndexOpenai = activeOpenaiApiKeyIndex;
+      let attemptedKeysOpenai = 0;
+      let lastSwitchEligibleErrorOpenai = null;
+
+      while (attemptedKeysOpenai < totalKeysOpenai) {
+        const activeOpenaiKey = getActiveOpenaiApiKey();
+        if (!activeOpenaiKey) {
+          break;
+        }
+
+        if (!openaiService || openaiService.apiKey !== activeOpenaiKey) {
+          initializeOpenAiService(activeOpenaiKey, activeOpenAiModel, activeProgrammingLanguage);
+        }
+
+        try {
+          return await operation(openaiService, {
+            activeApiKeyIndex: activeOpenaiApiKeyIndex,
+            activeApiKey: activeOpenaiKey,
+            attempt: attemptedKeysOpenai + 1,
+            totalKeys: totalKeysOpenai
+          });
+        } catch (error) {
+          if (!isSwitchEligibleError(error)) {
+            throw error;
+          }
+
+          lastSwitchEligibleErrorOpenai = error;
+          attemptedKeysOpenai += 1;
+
+          if (attemptedKeysOpenai >= totalKeysOpenai) {
+            if (activeOpenaiApiKeyIndex !== startIndexOpenai) {
+              setActiveOpenaiApiKeyIndex(startIndexOpenai);
+              initializeOpenAiService(getActiveOpenaiApiKey(), activeOpenAiModel, activeProgrammingLanguage);
+            }
+            throw createAllKeysUnavailableError(lastSwitchEligibleErrorOpenai);
+          }
+
+          switchToNextOpenaiKey();
+        }
+      }
+
+      throw createAllKeysUnavailableError(lastSwitchEligibleErrorOpenai);
+    }
+
+    if (claudeApiKeys.length === 0) {
       throw new Error('No Claude API key configured. Add it in Settings.');
     }
 
@@ -307,7 +510,7 @@ function createClaudeRuntime() {
   ) {
     activeOllamaBaseUrl = String(baseUrl || getDefaultOllamaBaseUrl()).replace(/\/+$/, '');
     activeOllamaModel = String(modelName || getDefaultOllamaModel()).trim();
-    activeProgrammingLanguage = resolveProgrammingLanguage(programmingLanguage);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(programmingLanguage));
 
     try {
       console.log(
@@ -343,6 +546,9 @@ function createClaudeRuntime() {
     if (activeAiProvider === 'ollama') {
       return initializeOllamaService(activeOllamaBaseUrl, activeOllamaModel, activeProgrammingLanguage);
     }
+    if (activeAiProvider === 'openai') {
+      return initializeOpenAiService(getActiveOpenaiApiKey(), activeOpenAiModel, activeProgrammingLanguage);
+    }
     return initializeClaudeService(getActiveApiKey(), activeClaudeModel, activeProgrammingLanguage);
   }
 
@@ -377,7 +583,19 @@ function createClaudeRuntime() {
     if (activeAiProvider === 'ollama') {
       return ollamaService;
     }
+    if (activeAiProvider === 'openai') {
+      return openaiService;
+    }
     return claudeService;
+  }
+
+  function getActiveOpenAiModel() {
+    return activeOpenAiModel;
+  }
+
+  function setActiveOpenAiModel(modelName) {
+    activeOpenAiModel = resolveOpenAiModel(modelName);
+    return activeOpenAiModel;
   }
 
   function getActiveClaudeModel() {
@@ -394,7 +612,7 @@ function createClaudeRuntime() {
   }
 
   function setActiveProgrammingLanguage(language) {
-    activeProgrammingLanguage = resolveProgrammingLanguage(language);
+    activeProgrammingLanguage = serializeProgrammingLanguages(normalizeProgrammingLanguages(language));
     return activeProgrammingLanguage;
   }
 
@@ -402,19 +620,28 @@ function createClaudeRuntime() {
     activeKeyIndexChangeHandler = typeof handler === 'function' ? handler : null;
   }
 
+  function setActiveOpenaiKeyIndexChangeHandler(handler) {
+    activeOpenaiKeyIndexChangeHandler = typeof handler === 'function' ? handler : null;
+  }
+
   return {
     initializeClaudeService,
+    initializeOpenAiService,
     initializeOllamaService,
     initializeAiService,
     setKeys,
+    setOpenaiKeys,
     getApiKeys,
     hasApiKeys,
     getActiveApiKey,
     getActiveApiKeyIndex: () => activeApiKeyIndex,
+    getOpenaiApiKeys: () => [...openaiApiKeys],
+    getActiveOpenaiApiKeyIndex: () => activeOpenaiApiKeyIndex,
     switchToNextKey,
     executeWithKeyFailover,
     isAllKeysUnavailableError,
     setActiveKeyIndexChangeHandler,
+    setActiveOpenaiKeyIndexChangeHandler,
     getService,
     getAiProviders,
     getDefaultAiProvider,
@@ -424,6 +651,10 @@ function createClaudeRuntime() {
     getDefaultClaudeModel,
     getActiveClaudeModel,
     setActiveClaudeModel,
+    getOpenAiModels,
+    getDefaultOpenAiModel,
+    getActiveOpenAiModel,
+    setActiveOpenAiModel,
     getDefaultOllamaBaseUrl,
     getDefaultOllamaModel,
     getActiveOllamaBaseUrl,

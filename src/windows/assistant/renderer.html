@@ -197,6 +197,7 @@
           <label class="settings-label">AI Provider</label>
           <select id="setting-ai-provider" class="settings-input">
             <option value="claude">Claude (Anthropic)</option>
+            <option value="openai">OpenAI</option>
             <option value="ollama">Ollama (Local)</option>
           </select>
         </div>
@@ -212,6 +213,20 @@
           <div class="settings-group">
             <label class="settings-label">Claude Model</label>
             <select id="setting-claude-model" class="settings-input"></select>
+          </div>
+        </div>
+        <div id="openai-settings-group" class="hidden">
+          <div class="settings-group">
+            <label class="settings-label">OpenAI API Key(s)</label>
+            <div class="settings-input-row">
+              <input type="password" id="setting-openai-key" class="settings-input" placeholder="Enter OpenAI API key(s), comma-separated..." />
+              <button type="button" id="toggle-openai-key-visibility" class="settings-input-toggle" aria-label="Show OpenAI API key" aria-pressed="false">Show</button>
+            </div>
+            <div class="settings-helper-text">Multiple keys are supported as comma-separated values (automatic failover).</div>
+          </div>
+          <div class="settings-group">
+            <label class="settings-label">OpenAI Model</label>
+            <select id="setting-openai-model" class="settings-input"></select>
           </div>
         </div>
         <div id="ollama-settings-group" class="hidden">
@@ -231,8 +246,9 @@
           </div>
         </div>
         <div class="settings-group">
-          <label class="settings-label">Programming Language</label>
-          <select id="setting-programming-language" class="settings-input"></select>
+          <label class="settings-label">Programming languages</label>
+          <div id="setting-programming-languages" class="settings-programming-languages" role="group" aria-label="Programming languages"></div>
+          <div class="settings-helper-text">Select one or more. Order in the list is priority (first checked language in list order wins when choosing a default).</div>
         </div>
         <div class="settings-group">
           <label class="settings-label">AssemblyAI API Key</label>
