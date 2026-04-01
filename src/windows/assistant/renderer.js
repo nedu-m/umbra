@@ -36,7 +36,8 @@ const AUTO_ANSWER_RETRY_MS = 1200;
 const DEFAULT_AUTO_ANSWER_DEBOUNCE_MS = 1800;
 const DEFAULT_AUTO_ANSWER_COOLDOWN_MS = 7000;
 const COMPACT_MODE_STORAGE_KEY = 'assistant-compact-mode';
-const COMPACT_WINDOW_HEIGHT = 72;
+/** Toolbar (~38px) + scrollable transcript strip (~3–4 lines); keep in sync with main process defaults */
+const COMPACT_WINDOW_HEIGHT = 114;
 const EXPANDED_WINDOW_HEIGHT = 380;
 let autoAnswerMode = AUTO_ANSWER_TRANSCRIPT;
 let autoAnswerTimeout = null;
@@ -107,6 +108,8 @@ const monitorStatusMic = document.getElementById('monitor-status-mic');
 const monitorLiveSystem = document.getElementById('monitor-live-system');
 const monitorLiveMic = document.getElementById('monitor-live-mic');
 const monitorLogList = document.getElementById('monitor-log-list');
+const compactPromptViewport = document.getElementById('compact-prompt-viewport');
+const compactPromptBody = document.getElementById('compact-prompt-body');
 const windowResizeHandles = document.querySelectorAll('[data-resize-handle]');
 
 const screenshotBtn = document.getElementById('screenshot-btn');
@@ -130,7 +133,6 @@ const insightsBtn = document.getElementById('insights-btn');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
 const toolbarMenuBtn = document.getElementById('toolbar-menu-btn');
 const toolbarMenu = document.getElementById('toolbar-menu');
-const chatTabBtn = document.getElementById('chat-tab-btn');
 
 // Settings elements
 const settingsBtn = document.getElementById('settings-btn');
@@ -160,8 +162,8 @@ const settingsShortcutsList = document.getElementById('settings-shortcuts-list')
 // Timer
 let startTime = Date.now();
 let timerInterval;
-const MIN_WINDOW_WIDTH = 600;
-const MIN_WINDOW_HEIGHT = 72;
+const MIN_WINDOW_WIDTH = 720;
+const MIN_WINDOW_HEIGHT = COMPACT_WINDOW_HEIGHT;
 const MAX_CHAT_INPUT_HEIGHT = 88;
 
 let isCloseConfirmationOpen = false;
@@ -199,6 +201,7 @@ const chatUiManager = createChatUiManager({
     updateUi: () => updateUI(),
     onMessagesChanged: (messages) => {
         chatMessagesArray = messages;
+        refreshCompactPromptStrip();
     },
     showFeedback: (message, type) => showFeedback(message, type),
     addMonitorLog: (...args) => addMonitorLog(...args)
@@ -264,6 +267,7 @@ async function init() {
 
     const settings = await loadShortcutConfig();
     loadCompactModePreference();
+    document.body.classList.toggle('compact-mode', isCompactMode);
     loadAutoAnswerMode();
     setupEventListeners();
     setupToolbarMenu();
@@ -293,6 +297,7 @@ async function init() {
             console.error('Failed to apply compact mode:', error);
         });
     }, 0);
+
 }
 
 function updateWindowOpacityValueLabel(value) {
@@ -560,6 +565,55 @@ function escapeHtml(value) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+}
+
+function compactDumpLabel(message) {
+    switch (message.type) {
+        case 'voice-system':
+            return 'Meeting';
+        case 'voice-mic':
+        case 'voice':
+            return 'You';
+        case 'ai-response':
+            return 'AI';
+        case 'screenshot':
+            return message.screenshotId ? `Screenshot (${message.screenshotId})` : 'Screenshot';
+        default:
+            return message.type;
+    }
+}
+
+function buildCompactDumpText(messages) {
+    const blocks = [];
+    for (const m of messages) {
+        if (m.type === 'system') {
+            continue;
+        }
+        const content = String(m.content ?? '');
+        if (!content.trim()) {
+            continue;
+        }
+        blocks.push(`${compactDumpLabel(m)}\n${content}`);
+    }
+    return blocks.join('\n\n');
+}
+
+function refreshCompactPromptStrip() {
+    if (!compactPromptViewport || !compactPromptBody) {
+        return;
+    }
+
+    if (!isCompactMode) {
+        return;
+    }
+
+    const plain = buildCompactDumpText(messageStore.getMessages());
+    const display = plain || 'Transcripts and AI answers appear here.';
+    compactPromptBody.textContent = display;
+
+    requestAnimationFrame(() => {
+        compactPromptViewport.scrollTop = compactPromptViewport.scrollHeight;
+    });
 }
 
 function isMessageIncludedForAi(message) {
@@ -1198,6 +1252,8 @@ function updateUI() {
         autoAnswerBtn.disabled = !canRunAiActions;
         updateAutoAnswerButtonUi();
     }
+
+    refreshCompactPromptStrip();
 }
 
 function showFeedback(message, type = 'info') {
@@ -1254,6 +1310,7 @@ async function applyCompactMode(nextCompactMode, { skipResize = false } = {}) {
     isCompactMode = Boolean(nextCompactMode);
     saveCompactModePreference(isCompactMode);
     document.body.classList.toggle('compact-mode', isCompactMode);
+    refreshCompactPromptStrip();
 
     if (skipResize || !window.electronAPI?.getWindowBounds || !window.electronAPI?.setWindowBounds) {
         return;

@@ -58,10 +58,6 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
           Analyze Screen
         </button>
-        <button id="chat-tab-btn" class="toolbar-tab" type="button">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
-          Chat
-        </button>
       </div>
 
       <!-- Right: timer, menu, utilities -->
@@ -117,6 +113,13 @@
       </div>
     </div>
 
+    <!-- Compact mode: full conversation + answers (scrollable dump) -->
+    <div id="compact-prompt" class="compact-prompt" aria-live="polite">
+      <div id="compact-prompt-viewport" class="compact-prompt-viewport">
+        <div id="compact-prompt-body" class="compact-prompt-body"></div>
+      </div>
+    </div>
+
     <!-- Transcription monitor (compact) -->
     <div id="transcription-monitor" class="transcription-monitor">
       <div class="monitor-header">
@@ -149,8 +152,8 @@
           id="chat-manual-input"
           class="chat-manual-input"
           rows="1"
-          placeholder="Type a message for AI..."
-          aria-label="Manual context input"
+          placeholder="Add context to the conversation..."
+          aria-label="Add context to the conversation"
         ></textarea>
         <button id="chat-manual-send" class="chat-manual-send" type="button">Send</button>
       </div>

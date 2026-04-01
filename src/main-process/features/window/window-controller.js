@@ -1,7 +1,8 @@
-﻿const {
+const {
   WINDOW_DEFAULT_WIDTH,
   WINDOW_DEFAULT_HEIGHT,
   WINDOW_MIN_WIDTH,
+  WINDOW_MAX_WIDTH,
   WINDOW_MIN_HEIGHT,
   WINDOW_OPACITY_LEVEL_MIN,
   WINDOW_OPACITY_LEVEL_MAX,
@@ -186,6 +187,7 @@ function createWindowController({
       defaultWidth: WINDOW_DEFAULT_WIDTH,
       defaultHeight: WINDOW_DEFAULT_HEIGHT,
       minWidth: WINDOW_MIN_WIDTH,
+      maxWidth: WINDOW_MAX_WIDTH,
       minHeight: WINDOW_MIN_HEIGHT,
       hideFromScreenCapture: appEnvironment.hideFromScreenCapture,
       initialOpacity: launchHidden ? getStealthWindowOpacity() : getVisibleWindowOpacity(),
@@ -220,7 +222,7 @@ function createWindowController({
     const display = screen.getDisplayMatching(rawBounds);
     const workArea = display && display.workArea ? display.workArea : screen.getPrimaryDisplay().workArea;
 
-    const width = clamp(rawBounds.width, WINDOW_MIN_WIDTH, workArea.width);
+    const width = clamp(rawBounds.width, WINDOW_MIN_WIDTH, Math.min(WINDOW_MAX_WIDTH, workArea.width));
     const height = clamp(rawBounds.height, WINDOW_MIN_HEIGHT, workArea.height);
     const x = clamp(rawBounds.x, workArea.x, workArea.x + workArea.width - width);
     const y = clamp(rawBounds.y, workArea.y, workArea.y + workArea.height - height);
@@ -375,7 +377,7 @@ function createWindowController({
     const scale = getWindowSizeScaleForPreset(clampedPreset);
     const currentBounds = mainWindow.getBounds();
 
-    const width = Math.round(WINDOW_MIN_WIDTH * scale);
+    const width = WINDOW_DEFAULT_WIDTH;
     const height = Math.round(WINDOW_MIN_HEIGHT * scale);
 
     const centerX = currentBounds.x + Math.round(currentBounds.width / 2);

@@ -53,12 +53,14 @@ function createInvokeActions(ipcRenderer) {
     getWindowBounds: invokeWithFallback(ipcRenderer, {
       channel: 'get-window-bounds',
       label: 'getWindowBounds',
+      silent: true,
       fallback: (error) => ({ error: error.message })
     }),
 
     setWindowBounds: invokeWithFallback(ipcRenderer, {
       channel: 'set-window-bounds',
       label: 'setWindowBounds',
+      silent: true,
       fallback: (error) => ({ error: error.message })
     }),
 

@@ -1,7 +1,10 @@
-﻿const WINDOW_DEFAULT_WIDTH = 720;
-const WINDOW_DEFAULT_HEIGHT = 72;
-const WINDOW_MIN_WIDTH = 600;
-const WINDOW_MIN_HEIGHT = 72;
+const WINDOW_DEFAULT_WIDTH = 720;
+/** Matches renderer compact mode: toolbar + a few lines of transcript */
+const WINDOW_DEFAULT_HEIGHT = 114;
+/** Fixed horizontal size (compact bar width) */
+const WINDOW_MIN_WIDTH = 720;
+const WINDOW_MAX_WIDTH = 720;
+const WINDOW_MIN_HEIGHT = 114;
 const WINDOW_OPACITY_LEVEL_MIN = 1;
 const WINDOW_OPACITY_LEVEL_MAX = 10;
 const DEFAULT_WINDOW_OPACITY_LEVEL = 10;
@@ -11,6 +14,7 @@ module.exports = {
   WINDOW_DEFAULT_WIDTH,
   WINDOW_DEFAULT_HEIGHT,
   WINDOW_MIN_WIDTH,
+  WINDOW_MAX_WIDTH,
   WINDOW_MIN_HEIGHT,
   WINDOW_OPACITY_LEVEL_MIN,
   WINDOW_OPACITY_LEVEL_MAX,

@@ -1,8 +1,10 @@
-﻿function invokeWithFallback(ipcRenderer, { channel, label, fallback, transformArgs }) {
+function invokeWithFallback(ipcRenderer, { channel, label, fallback, transformArgs, silent }) {
   return (...args) => {
     const callArgs = typeof transformArgs === 'function' ? transformArgs(args) : args;
 
-    console.log(`PreloadAPI: ${label} called`);
+    if (!silent) {
+      console.log(`PreloadAPI: ${label} called`);
+    }
 
     return ipcRenderer.invoke(channel, ...callArgs).catch((error) => {
       console.error(`PreloadAPI: ${label} error:`, error);

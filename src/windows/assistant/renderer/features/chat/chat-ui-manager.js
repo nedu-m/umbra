@@ -180,6 +180,8 @@ export function createChatUiManager({
         if (shouldAutoScroll) {
             chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
         }
+
+        onMessagesChanged?.(messageStore.getMessages());
     }
 
     function submitManualContextMessage() {
@@ -189,7 +191,7 @@ export function createChatUiManager({
 
         const text = String(chatManualInput.value || '').trim();
         if (!text) {
-            showFeedback?.('Type a message first', 'error');
+            showFeedback?.('Add context first', 'error');
             return false;
         }
 

@@ -7,6 +7,7 @@ function createAssistantWindow({
   defaultWidth,
   defaultHeight,
   minWidth,
+  maxWidth,
   minHeight,
   hideFromScreenCapture,
   initialOpacity,
@@ -14,20 +15,22 @@ function createAssistantWindow({
   nodeEnv
 }) {
   console.log('Creating assistant window...');
-  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const x = Math.floor((width - defaultWidth) / 2);
+  const { width: screenW, height: screenH } = screen.getPrimaryDisplay().workAreaSize;
+  const x = Math.floor((screenW - defaultWidth) / 2);
   const y = 40;
   const windowOpacity = Number.isFinite(initialOpacity) ? initialOpacity : 1;
 
   console.log(`Window position: ${x}, ${y}, size: ${defaultWidth}x${defaultHeight}`);
+
+  const effectiveMaxWidth = Number.isFinite(maxWidth) ? maxWidth : screenW;
 
   const mainWindow = new BrowserWindow({
     width: defaultWidth,
     height: defaultHeight,
     minWidth,
     minHeight,
-    maxWidth: width,
-    maxHeight: height,
+    maxWidth: Math.min(screenW, effectiveMaxWidth),
+    maxHeight: screenH,
     x,
     y,
     webPreferences: {
@@ -62,6 +65,10 @@ function createAssistantWindow({
     titleBarStyle: 'hidden',
     backgroundColor: '#00000000'
   });
+
+  if (process.platform === 'darwin' && typeof mainWindow.setWindowButtonVisibility === 'function') {
+    mainWindow.setWindowButtonVisibility(false);
+  }
 
   const htmlPath = path.join(__dirname, 'renderer.html');
   console.log('Loading HTML from:', htmlPath);

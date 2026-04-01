@@ -68,6 +68,47 @@ body.compact-mode .results-panel {
   display: none !important;
 }
 
+/* ── COMPACT CONVERSATION DUMP ── visible only in compact mode */
+.compact-prompt {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  padding: 0 8px 6px;
+}
+
+body.compact-mode .compact-prompt {
+  display: flex;
+}
+
+.compact-prompt-viewport {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-app-region: no-drag;
+}
+
+.compact-prompt-body {
+  padding: 6px 8px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 450;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: pre-wrap;
+  word-break: break-word;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+body.theme-dark .compact-prompt-viewport {
+  background: rgba(0, 0, 0, 0.45);
+}
+
 /* ── TOOLBAR ── single slim row */
 .toolbar {
   display: flex;
