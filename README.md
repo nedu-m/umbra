@@ -1,5 +1,7 @@
 # Umbra
 
+> Attribution: Umbra was originally developed by Shubham Shinde and is now maintained in this repository by `nedu-m`.
+
 Umbra is an Electron desktop copilot for technical interviews and live meetings. It combines AssemblyAI streaming transcription, screenshot capture, and LLM responses (Anthropic Claude, OpenAI, or a local Ollama model) in a compact always-on-top window.
 
 Use it only in environments where recording, transcription, screenshots, and AI assistance are allowed.

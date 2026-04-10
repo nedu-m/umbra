@@ -2,6 +2,11 @@
   "name": "umbra",
   "version": "1.0.0",
   "description": "Invisible AI assistant for meetings - undetectable during screen share",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nedu-m/umbra.git"
+  },
+  "homepage": "https://github.com/nedu-m/umbra",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -90,6 +95,9 @@
       "icon": "assets/chrome.png"
     }
   },
-  "author": "Umbra",
+  "author": "nedu-m",
+  "contributors": [
+    "Shubham Shinde <70743278+shubhamshnd@users.noreply.github.com> (original developer)"
+  ],
   "license": "MIT"
 }
